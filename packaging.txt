@@ -1,0 +1,3 @@
+after creating a setup.py 
+
+pip wheel . inside project directory
