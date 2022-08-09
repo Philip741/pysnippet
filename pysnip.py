@@ -84,7 +84,11 @@ def snippet_menu():
     categ_comp = WordCompleter(categories)
     print("Enter snippet category\n")
     cat_input = session.prompt('category# ',completer = categ_comp)
-    cat_input = cat_input.split()
+    if cat_input in categories:
+        cat_input = cat_input.split()
+    else:
+        print('Category not found')
+        return
 
     if len(cat_input) >= 1 and len(cat_input) < 32 :
         #populate list of snippets based on category
@@ -178,6 +182,7 @@ def compl_snippets(category):
                     snip_list.append(k)
     except:
         print("Snippet not found")
+        return
     return snip_list
     
 def write_json(data, filename):
