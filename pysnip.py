@@ -44,7 +44,8 @@ def main():
 def main_menu(main_commands):
     session = PromptSession()
     categ_comp = WordCompleter(main_commands)
-    text_input = session.prompt('# ',completer = categ_comp)
+    print("\n")
+    text_input = session.prompt('Mainmenu# ',completer = categ_comp)
     command = text_input
     if command == 'category':
         snip_category = get_categories()
@@ -63,6 +64,7 @@ def main_menu(main_commands):
      #   new_prompt = session.prompt("New category name: ")
       #  create_category(new_prompt)
     elif command == 'add':
+        categories = get_categories()
         categ_comp = WordCompleter(categories)
         category_prompt = session.prompt("category: ", completer = categ_comp)
         add_snippet(category_prompt) 
@@ -93,11 +95,17 @@ def snippet_menu():
     if len(cat_input) >= 1 and len(cat_input) < 32 :
         #populate list of snippets based on category
         snips = compl_snippets(cat_input[0])
+        if len(snips) == 0:
+            return
+        print(f"List of snippets {snips}")
         snip_complete = WordCompleter(snips)
         print("Enter snippet name\n")
         snip_prompt = session.prompt(f'{cat_input}# ', completer = snip_complete)
-        search(cat_input[0], snip_prompt)
-          
+        if snip_prompt in snips:
+            search(cat_input[0], snip_prompt)
+        else:
+            print("Snippet not found")
+
 def search(category,snippet=''):
     if category != 'avail': 
         try:
@@ -181,8 +189,7 @@ def compl_snippets(category):
                 for k,v in s.items():
                     snip_list.append(k)
     except:
-        print("Snippet not found")
-        return
+        print("Snippets not found")
     return snip_list
     
 def write_json(data, filename):
