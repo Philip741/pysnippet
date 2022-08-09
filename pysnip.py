@@ -18,29 +18,12 @@ def main():
     ''' Function to check input at prompt and match'''
     main_commands = ['category','help','clear','add','delete','snippet']
 
-    #categories = get_categories()
-    # Create session
-    #session = PromptSession()
-
     while(True):
         menu = main_menu(main_commands)
         #print(menu)
         if menu == "exit":
             break
-        # create dict of commands 
-   #         command = text_input[0]
-    #        if command == 'search' or command == 's':
-     #           for i in categories:
-      #              complete_snips = compl_snippets(i)
-       #             snip_list.append(complete_snips)
-        #        join_snips = list(chain.from_iterable(snip_list))
-         #       categ_comp = WordCompleter(categories)
-          #      comp_snips = WordCompleter(join_snips)
-           #     category_prompt = session.prompt("category name: ", completer = categ_comp)
-            #    #use category name here to get snips just for that category to complete.Not all snips
-             #   snippet_prompt = session.prompt("snippet name: ", completer = comp_snips)
-                
-              #  search(category_prompt,snippet_prompt)
+
 def main_menu(main_commands):
     session = PromptSession()
     categ_comp = WordCompleter(main_commands)
@@ -60,9 +43,7 @@ def main_menu(main_commands):
                 
     elif command == 'clear':
         clear_screen()
-    #elif command == 'new':
-     #   new_prompt = session.prompt("New category name: ")
-      #  create_category(new_prompt)
+
     elif command == 'add':
         categories = get_categories()
         categ_comp = WordCompleter(categories)
@@ -73,8 +54,7 @@ def main_menu(main_commands):
         session.output.flush()
         menu_output = "exit"
         return menu_output
-          #  else:
-           #     print('Command not found')
+
     else:
        if len(text_input) == 0:
          pass
@@ -112,9 +92,7 @@ def search(category,snippet=''):
             with open('snippets/' + category + ".json", 'r') as f:
                 data = json.load(f)    
                 for s in data:
-                    #x = s
                     for k,v in s.items():
-                        #print(k,v)
                         if k == snippet:
                             for value in v:
                                 print("\n" + value)
@@ -142,7 +120,6 @@ def edit_snippet():
 
 def search_snip():
     '''Search snippets after entering category'''
-    #need try except here 
     print("Search Snippet Category\n")
     snipname =  input("Enter snippet category: ")
     if snipname == 'avail':
@@ -167,14 +144,10 @@ def search_snip():
 def get_categories():
 #    '''Returns a list of all category files'''
     all_files = []
-#    print('Snippet Categories')
-#    print('------------------\n')
-#    print('Pick a category\n')
     snippets_dir = 'snippets/'
     for root,dirs,files  in os.walk(snippets_dir):
         for f in files:
             f = f.split('.')
-            #print(f[0])
             all_files.append(f[0])
     return all_files       
 
