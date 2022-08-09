@@ -47,7 +47,9 @@ def main_menu(main_commands):
     text_input = session.prompt('# ',completer = categ_comp)
     command = text_input
     if command == 'category':
-        get_categories()
+        snip_category = get_categories()
+        for c in snip_category:
+            print(c)
 
     elif command == 'help':
         print('show help here')
