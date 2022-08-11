@@ -28,7 +28,7 @@ def main_menu(main_commands):
     session = PromptSession()
     categ_comp = WordCompleter(main_commands)
     print("\n")
-    text_input = session.prompt('Mainmenu# ',completer = categ_comp)
+    text_input = session.prompt('Main-menu# ',completer = categ_comp)
     command = text_input
     if command == 'category':
         snip_category = get_categories()
@@ -80,7 +80,7 @@ def snippet_menu():
         print(f"List of snippets {snips}")
         snip_complete = WordCompleter(snips)
         print("Enter snippet name\n")
-        snip_prompt = session.prompt(f'{cat_input}# ', completer = snip_complete)
+        snip_prompt = session.prompt(f'{cat_input[0]}# ', completer = snip_complete)
         if snip_prompt in snips:
             search(cat_input[0], snip_prompt)
         else:
