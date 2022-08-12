@@ -16,7 +16,9 @@ from itertools import chain
 
 def main():
     ''' Function to check input at prompt and match'''
-    main_commands = ['category','help','clear','add','delete','snippet']
+    main_commands = ['category','help','clear','add','delete','snippets','new-category']
+    #snippet directory check and create if absent
+    snippet_dir()
 
     while(True):
         menu = main_menu(main_commands)
@@ -38,7 +40,7 @@ def main_menu(main_commands):
     elif command == 'help':
         print('show help here')
 
-    elif command == 'snippet':
+    elif command == 'snippets':
         snippet_menu()
                 
     elif command == 'clear':
@@ -49,6 +51,10 @@ def main_menu(main_commands):
         categ_comp = WordCompleter(categories)
         category_prompt = session.prompt("category: ", completer = categ_comp)
         add_snippet(category_prompt) 
+        
+    elif command == 'new-category':
+        category_prompt = session.prompt("new category name: ")
+        create_category(category_prompt)
         
     elif command == 'exit':
         session.output.flush()
@@ -80,11 +86,14 @@ def snippet_menu():
         print(f"List of snippets {snips}")
         snip_complete = WordCompleter(snips)
         print("Enter snippet name\n")
-        snip_prompt = session.prompt(f'{cat_input[0]}# ', completer = snip_complete)
-        if snip_prompt in snips:
-            search(cat_input[0], snip_prompt)
-        else:
-            print("Snippet not found")
+        while(True):
+            snip_prompt = session.prompt(f'{cat_input[0]}# ', completer = snip_complete)
+            if snip_prompt in snips:
+                search(cat_input[0], snip_prompt)
+            elif snip_prompt == "exit":
+                break
+            else:
+                print("Snippet not found")
 
 def search(category,snippet=''):
     if category != 'avail': 
@@ -209,13 +218,19 @@ def clear_screen():
     else: 
         _ = os.system('clear') 
 
+def snippet_dir():
+    with open('pysnip.cfg','r') as f:
+        cfg_lines = [l for l in f]
+        for dir in cfg_lines:
+            if "snippet_location" in dir:
+                print(dir)
 
 bindings = KeyBindings()
 # key bindings
 @bindings.add('c-s')
 def _(event):
     " Search when `c-s` is pressed. "
-    run_in_terminal(search_snip)
+    run_in_terminal(snippet_menu())
 
 if __name__ == '__main__':
     main()
