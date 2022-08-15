@@ -42,6 +42,11 @@ def main_menu(main_commands):
 
     elif command == 'snippets':
         snippet_menu()
+
+    elif command == 'delete':
+        category_name = input("Input category: ")
+        snippet_name = input("snippet to delete: ")
+        del_snippet(category_name, snippet_name)
                 
     elif command == 'clear':
         clear_screen()
@@ -123,7 +128,26 @@ def add_snippet(category):
         # append newly added text to category file contents
         append_snip.append(snippet_text)
     write_json(append_snip,'snippets/' + category + ".json")
-    
+
+def del_snippet(category, snippet):
+    with open('snippets/' + category + ".json", 'r') as f:
+        data = json.load(f)    
+        #flatten list to dict
+        snippet_dict = {key: value for s in data for key, value in s.items()}
+
+        for s in snippet_dict.keys():
+            if s == snippet:
+                del_key = s
+
+    del snippet_dict[del_key]
+    print(snippet_dict)
+    #open file and write data with key removed
+    with open('snippets/' + category + ".json", 'w') as f:
+        snippet_list = []
+        snippet_list.append(snippet_dict)
+        json.dump(snippet_list,f, indent=4)    
+
+
 def edit_snippet():
     pass
 
