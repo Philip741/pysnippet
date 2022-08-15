@@ -140,7 +140,6 @@ def del_snippet(category, snippet):
                 del_key = s
 
     del snippet_dict[del_key]
-    print(snippet_dict)
     #open file and write data with key removed
     with open('snippets/' + category + ".json", 'w') as f:
         snippet_list = []
