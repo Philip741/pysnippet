@@ -5,6 +5,7 @@
 
 import os
 import json
+import configparser
 from prompt_toolkit import prompt
 from prompt_toolkit import PromptSession
 from prompt_toolkit.key_binding import KeyBindings
@@ -13,12 +14,16 @@ from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.completion import WordCompleter
 from itertools import chain
 
+config = configparser.ConfigParser()
+config.read_file(open('pysnip.cfg'))    
+snippet_path = config.get('file_location','snippet_location')
+print(snippet_path)
 
 def main():
     ''' Function to check input at prompt and match'''
     main_commands = ['category','help','clear','add','delete','snippets','new-category']
     #snippet directory check and create if absent
-    snippet_dir()
+    #load config file
 
     while(True):
         menu = main_menu(main_commands)
@@ -27,11 +32,13 @@ def main():
             break
 
 def main_menu(main_commands):
+
     session = PromptSession()
     categ_comp = WordCompleter(main_commands)
     print("\n")
     text_input = session.prompt('Main-menu# ',completer = categ_comp)
     command = text_input
+
     if command == 'category':
         snip_category = get_categories()
         for c in snip_category:
@@ -47,7 +54,7 @@ def main_menu(main_commands):
         category_name = input("Input category: ")
         snippet_name = input("snippet to delete: ")
         del_snippet(category_name, snippet_name)
-                
+
     elif command == 'clear':
         clear_screen()
 
@@ -56,11 +63,11 @@ def main_menu(main_commands):
         categ_comp = WordCompleter(categories)
         category_prompt = session.prompt("category: ", completer = categ_comp)
         add_snippet(category_prompt) 
-        
+
     elif command == 'new-category':
         category_prompt = session.prompt("new category name: ")
         create_category(category_prompt)
-        
+
     elif command == 'exit':
         session.output.flush()
         menu_output = "exit"
@@ -176,7 +183,8 @@ def search_snip():
 def get_categories():
 #    '''Returns a list of all category files'''
     all_files = []
-    snippets_dir = 'snippets/'
+    snippets_dir = snippet_path
+    print(snippets_dir)
     for root,dirs,files  in os.walk(snippets_dir):
         for f in files:
             f = f.split('.')
@@ -241,12 +249,6 @@ def clear_screen():
     else: 
         _ = os.system('clear') 
 
-def snippet_dir():
-    with open('pysnip.cfg','r') as f:
-        cfg_lines = [l for l in f]
-        for dir in cfg_lines:
-            if "snippet_location" in dir:
-                print(dir)
 
 bindings = KeyBindings()
 # key bindings
