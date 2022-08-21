@@ -112,13 +112,15 @@ def search(category,snippet=''):
         try:
             with open('snippets/' + category + ".json", 'r') as f:
                 data = json.load(f)    
+                print("\n")
                 for s in data:
                     for k,v in s.items():
                         if k == snippet:
                             for value in v:
-                                print("\n" + value + "\n")
+                                print(value)
                         elif snippet == "all":
                             print("\n" + k)
+                print("\n")
         except:
             print("Snippet not found")
 
@@ -207,6 +209,7 @@ def snippet_input(snip_name):
     while(True):
         try:
             line = prompt("# ")
+            line = line.rstrip()
             snippet_content.append(line)
             #create key with snip_name and value is list of snippet content
             snippet_dict[snip_name] = snippet_content
@@ -227,12 +230,8 @@ def clear_screen():
         _ = os.system('clear') 
 
 
-bindings = KeyBindings()
+#bindings = KeyBindings()
 # key bindings
-@bindings.add('c-s')
-def _(event):
-    " Search when `c-s` is pressed. "
-    run_in_terminal(snippet_menu())
 
 if __name__ == '__main__':
     main()
