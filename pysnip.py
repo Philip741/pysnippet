@@ -116,7 +116,7 @@ def search(category,snippet=''):
                     for k,v in s.items():
                         if k == snippet:
                             for value in v:
-                                print("\n" + value)
+                                print("\n" + value + "\n")
                         elif snippet == "all":
                             print("\n" + k)
         except:
@@ -184,7 +184,6 @@ def get_categories():
 #    '''Returns a list of all category files'''
     all_files = []
     snippets_dir = snippet_path
-    print(snippets_dir)
     for root,dirs,files  in os.walk(snippets_dir):
         for f in files:
             f = f.split('.')
