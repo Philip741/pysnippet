@@ -157,28 +157,6 @@ def del_snippet(category, snippet):
 def edit_snippet():
     pass
 
-def search_snip():
-    '''Search snippets after entering category'''
-    print("Search Snippet Category\n")
-    snipname =  input("Enter snippet category: ")
-    if snipname == 'avail':
-        return get_categories()
-    
-    print("Enter snippet name or all(for all snippet names)") 
-    snippet = input("Enter snippet name: ")
-    try:
-        with open('snippets/' + snipname + ".json", 'r') as f:
-            data = json.load(f)    
-            for s in data:
-                for k,v in s.items():
-                    #print(k,v)
-                    if k == snippet:
-                        for value in v:
-                            print(value)
-                    elif snippet == "all":
-                        print(k)
-    except:
-        print("Could not find snippet name")
 
 def get_categories():
 #    '''Returns a list of all category files'''
