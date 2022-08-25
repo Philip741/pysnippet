@@ -17,7 +17,6 @@ from itertools import chain
 config = configparser.ConfigParser()
 config.read_file(open('pysnip.cfg'))    
 snippet_path = config.get('file_location','snippet_location')
-print(snippet_path)
 
 def main():
     ''' Function to check input at prompt and match'''
@@ -45,7 +44,9 @@ def main_menu(main_commands):
             print(c)
 
     elif command == 'help':
-        print('show help here')
+        print('The available main menu commands are: ')
+        for c in main_commands:
+            print(c)
 
     elif command == 'snippets':
         snippet_menu()
