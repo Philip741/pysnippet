@@ -5,6 +5,7 @@
 import os
 import json
 import configparser
+import subprocess
 from prompt_toolkit import prompt
 from prompt_toolkit import PromptSession
 from prompt_toolkit.key_binding import KeyBindings
@@ -19,7 +20,7 @@ snippet_path = config.get('file_location','snippet_location')
 
 def main():
     ''' Function to check input at prompt and match'''
-    main_commands = ['category','help','clear','add','delete','snippets','new-category']
+    main_commands = ['category','help','edit','clear','add','delete','snippets','new-category']
     #snippet directory check and create if absent
     #load config file
 
@@ -62,6 +63,13 @@ def main_menu(main_commands):
         categ_comp = WordCompleter(categories)
         category_prompt = session.prompt("category: ", completer = categ_comp)
         add_snippet(category_prompt) 
+
+    elif command == 'edit':
+        categories = get_categories()
+        categ_comp = WordCompleter(categories)
+        category_prompt = session.prompt("category: ", completer = categ_comp)
+        snippet_name = input("snippet to edit: ")
+        edit_snippet(category_prompt, snippet_name) 
 
     elif command == 'new-category':
         category_prompt = session.prompt("new category name: ")
@@ -151,10 +159,35 @@ def del_snippet(category, snippet):
     with open('snippets/' + category + ".json", 'w') as f:
         json.dump(data,f, indent=4)    
 
-
-def edit_snippet():
-    pass
-
+def edit_snippet(category, snippet):
+    editor = os.environ.get('EDITOR','vim')
+    snippet_path = 'snippets/' + category + ".json"
+    #open existing snippet file
+    with open(snippet_path, 'r') as f:
+        data = json.load(f)    
+        print(f"data first open in edit_snippet {data}")
+    #get snippet
+        for k,v in data.items():
+            print("edit snippet function for loop")
+            if k == snippet:
+                for value in v:
+                    edit_snippet = value
+    #write snippet to tmp file
+    with open('snippets/' + category + ".tmp", 'w') as f:
+        f.writelines(edit_snippet)
+    #delete original snippet from file
+    #del_snippet(category, snippet)
+    # open tmp file for editing with editor
+    subprocess.call([editor,'snippets/' + category + ".tmp"])
+    #append tmp file snippet back to original file
+    with open('snippets/' + category + ".tmp", 'r') as f:
+        snippet_lines = [l for l in f]
+        tmp_dict = {snippet:snippet_lines}
+    data.update(tmp_dict)
+    print(f"data with changes {data}")
+    write_json(data, snippet_path)
+        # delete tmp file
+    os.remove('snippets/' + category + ".tmp")
 
 def get_categories():
 #    '''Returns a list of all category files'''
