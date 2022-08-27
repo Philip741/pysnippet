@@ -1,6 +1,5 @@
 #!/bin/env python
 
-
 # author: Philip Browning
 
 import os
@@ -26,7 +25,6 @@ def main():
 
     while(True):
         menu = main_menu(main_commands)
-        #print(menu)
         if menu == "exit":
             break
 
@@ -108,20 +106,20 @@ def snippet_menu():
             else:
                 print("Snippet not found")
 
-def search(category,snippet=''):
+def search(category,snippet):
     if category != 'avail': 
         try:
             with open('snippets/' + category + ".json", 'r') as f:
                 data = json.load(f)    
                 print("\n")
-                for s in data:
-                    for k,v in s.items():
-                        if k == snippet:
-                            for value in v:
-                                print(value)
-                        elif snippet == "all":
-                            print("\n" + k)
+                for k,v in data.items():
+                    if k == snippet:
+                        for value in v:
+                            print(value)
+                    elif snippet == "all":
+                        print("\n" + k)
                 print("\n")
+            #better capture exception
         except:
             print("Snippet not found")
 
@@ -136,25 +134,22 @@ def add_snippet(category):
         # load file into append_snip
         append_snip = json.load(s)
         # append newly added text to category file contents
-        append_snip.append(snippet_text)
+        append_snip.update(snippet_text)
     write_json(append_snip,'snippets/' + category + ".json")
 
 def del_snippet(category, snippet):
     with open('snippets/' + category + ".json", 'r') as f:
         data = json.load(f)    
         #flatten list to dict
-        snippet_dict = {key: value for s in data for key, value in s.items()}
-
-        for s in snippet_dict.keys():
+        #snippet_dict = {key: value for s in data for key, value in s.items()}
+        for s in data.keys():
             if s == snippet:
                 del_key = s
 
-    del snippet_dict[del_key]
+    del data[del_key]
     #open file and write data with key removed
     with open('snippets/' + category + ".json", 'w') as f:
-        snippet_list = []
-        snippet_list.append(snippet_dict)
-        json.dump(snippet_list,f, indent=4)    
+        json.dump(data,f, indent=4)    
 
 
 def edit_snippet():
@@ -177,10 +172,8 @@ def compl_snippets(category):
     try:
         with open('snippets/' + category + ".json", 'r') as f:
             data = json.load(f)    
-            for s in data:
-                x = s
-                for k,v in s.items():
-                    snip_list.append(k)
+            for k,v in data.items():
+                snip_list.append(k)
     except:
         print("Snippets not found")
     return snip_list
@@ -198,7 +191,7 @@ def create_category(name):
         print("Category currently exists")
     else:
         with open(file_path, 'w') as s:
-            snippet_init = []
+            snippet_init = {}
             json.dump(snippet_init,s, indent=4)
 
 def snippet_input(snip_name):
