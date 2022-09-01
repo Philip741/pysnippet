@@ -117,7 +117,7 @@ def snippet_menu():
 def search(category,snippet):
     if category != 'avail': 
         try:
-            with open('snippets/' + category + ".json", 'r') as f:
+            with open(snippet_path + category + ".json", 'r') as f:
                 data = json.load(f)    
                 print("\n")
                 for k,v in data.items():
@@ -136,17 +136,17 @@ def strip_input(str_input):
 
 def add_snippet(category):
     snippet_name = prompt("Enter snippet name: ")
-    with open('snippets/' + category + ".json", 'r') as s:
+    with open(snippet_path + category + ".json", 'r') as s:
         #snippet_input function to enter snippet text
         snippet_text = snippet_input(snippet_name)
         # load file into append_snip
         append_snip = json.load(s)
         # append newly added text to category file contents
         append_snip.update(snippet_text)
-    write_json(append_snip,'snippets/' + category + ".json")
+    write_json(append_snip,snippet_path + category + ".json")
 
 def del_snippet(category, snippet):
-    with open('snippets/' + category + ".json", 'r') as f:
+    with open(snippet_path + category + ".json", 'r') as f:
         data = json.load(f)    
         #flatten list to dict
         #snippet_dict = {key: value for s in data for key, value in s.items()}
@@ -156,12 +156,11 @@ def del_snippet(category, snippet):
 
     del data[del_key]
     #open file and write data with key removed
-    with open('snippets/' + category + ".json", 'w') as f:
+    with open(snippet_path + category + ".json", 'w') as f:
         json.dump(data,f, indent=4)    
 
 def edit_snippet(category, snippet):
     editor = os.environ.get('EDITOR','vim')
-    snippet_path = 'snippets/' + category + ".json"
     #open existing snippet file
     with open(snippet_path, 'r') as f:
         data = json.load(f)    
@@ -173,27 +172,26 @@ def edit_snippet(category, snippet):
                 for value in v:
                     edit_snippet = value
     #write snippet to tmp file
-    with open('snippets/' + category + ".tmp", 'w') as f:
+    with open(snippet_path + category + ".tmp", 'w') as f:
         f.writelines(edit_snippet)
     #delete original snippet from file
     #del_snippet(category, snippet)
     # open tmp file for editing with editor
-    subprocess.call([editor,'snippets/' + category + ".tmp"])
+    subprocess.call([editor,snippet_path + category + ".tmp"])
     #append tmp file snippet back to original file
-    with open('snippets/' + category + ".tmp", 'r') as f:
+    with open(snippet_path + category + ".tmp", 'r') as f:
         snippet_lines = [l for l in f]
         tmp_dict = {snippet:snippet_lines}
     data.update(tmp_dict)
     print(f"data with changes {data}")
     write_json(data, snippet_path)
         # delete tmp file
-    os.remove('snippets/' + category + ".tmp")
+    os.remove(snippet_path + category + ".tmp")
 
 def get_categories():
 #    '''Returns a list of all category files'''
     all_files = []
-    snippets_dir = snippet_path
-    for root,dirs,files  in os.walk(snippets_dir):
+    for root,dirs,files  in os.walk(snippet_path):
         for f in files:
             f = f.split('.')
             all_files.append(f[0])
@@ -203,7 +201,7 @@ def compl_snippets(category):
     '''Returns list of all snippets in categories json file'''
     snip_list = []
     try:
-        with open('snippets/' + category + ".json", 'r') as f:
+        with open(snippet_path + category + ".json", 'r') as f:
             data = json.load(f)    
             for k,v in data.items():
                 snip_list.append(k)
@@ -218,7 +216,7 @@ def write_json(data, filename):
         json.dump(data,f, indent=4)    
 
 def create_category(name):
-    file_path = 'snippets/' + name + ".json"
+    file_path = snippet_path + name + ".json"
 
     if os.path.exists(file_path):
         print("Category currently exists")
@@ -232,7 +230,7 @@ def snippet_input(snip_name):
     snippet_dict = {}
     print("To save press enter for new line and")
     print("type ctrl d or ctrl z on windows to exit")
-    print("Input snippet: ") 
+    print("Input snippet: ")
     while(True):
         try:
             line = prompt("# ")
