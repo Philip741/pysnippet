@@ -17,10 +17,11 @@ from itertools import chain
 config = configparser.ConfigParser()
 config.read_file(open('pysnip.cfg'))    
 snippet_path = config.get('file_location','snippet_location')
+notes_path = config.get('file_location','note_location')
 
 def main():
     ''' Function to check input at prompt and match'''
-    main_commands = ['category','help','edit','clear','add','delete','snippets','new-category']
+    main_commands = ['category','help','edit','clear','add','delete','snippets','notes','new-category']
     #snippet directory check and create if absent
     #load config file
 
@@ -49,6 +50,9 @@ def main_menu(main_commands):
 
     elif command == 'snippets':
         snippet_menu()
+
+    elif command == 'notes':
+        notes_menu()
 
     elif command == 'delete':
         category_name = input("Input category: ")
@@ -86,8 +90,8 @@ def main_menu(main_commands):
 
 def snippet_menu():
     session = PromptSession()
-    categories = get_categories()
-    snip_list = []
+    categories = get_categories(snippet_path)
+    #snip_list = []
     categ_comp = WordCompleter(categories)
     print("Enter snippet category\n")
     cat_input = session.prompt('category# ',completer = categ_comp)
@@ -99,7 +103,7 @@ def snippet_menu():
 
     if len(cat_input) >= 1 and len(cat_input) < 32 :
         #populate list of snippets based on category
-        snips = compl_snippets(cat_input[0])
+        snips = compl_snippets(cat_input[0],snippet_path)
         if len(snips) == 0:
             return
         print(f"List of snippets {snips}")
@@ -108,16 +112,44 @@ def snippet_menu():
         while(True):
             snip_prompt = session.prompt(f'{cat_input[0]}# ', completer = snip_complete)
             if snip_prompt in snips:
-                search(cat_input[0], snip_prompt)
+                search(cat_input[0], snip_prompt,snippet_path)
             elif snip_prompt == "exit":
                 break
             else:
                 print("Snippet not found")
 
-def search(category,snippet):
+def notes_menu():
+    session = PromptSession()
+    categories = get_categories(notes_path)
+    categ_comp = WordCompleter(categories)
+    print("Enter Note category\n")
+    cat_input = session.prompt('category# ',completer = categ_comp)
+    if cat_input in categories:
+        cat_input = cat_input.split()
+    else:
+        print('Category not found')
+        return
+
+    #populate list of notes based on category
+    snips = compl_snippets(cat_input[0],notes_path)
+    if len(snips) == 0:
+        return
+    print(f"List of notes {snips}")
+    snip_complete = WordCompleter(snips)
+    print("Enter note name\n")
+    while(True):
+        snip_prompt = session.prompt(f'{cat_input[0]}# ', completer = snip_complete)
+        if snip_prompt in snips:
+            search(cat_input[0], snip_prompt,notes_path)
+        elif snip_prompt == "exit":
+            break
+        else:
+            print("Note not found")
+
+def search(category,snippet, path):
     if category != 'avail': 
         try:
-            with open(snippet_path + category + ".json", 'r') as f:
+            with open(path + category + ".json", 'r') as f:
                 data = json.load(f)    
                 print("\n")
                 for k,v in data.items():
@@ -188,20 +220,22 @@ def edit_snippet(category, snippet):
         # delete tmp file
     os.remove(snippet_path + category + ".tmp")
 
-def get_categories():
+def get_categories(path):
 #    '''Returns a list of all category files'''
     all_files = []
-    for root,dirs,files  in os.walk(snippet_path):
+    for root,dirs,files  in os.walk(path):
         for f in files:
             f = f.split('.')
             all_files.append(f[0])
+    all_files.sort()
     return all_files       
 
-def compl_snippets(category):
+def compl_snippets(category,path):
     '''Returns list of all snippets in categories json file'''
+    print(category)
     snip_list = []
     try:
-        with open(snippet_path + category + ".json", 'r') as f:
+        with open(path + category + ".json", 'r') as f:
             data = json.load(f)    
             for k,v in data.items():
                 snip_list.append(k)
