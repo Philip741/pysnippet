@@ -21,7 +21,7 @@ notes_path = config.get('file_location','note_location')
 
 def main():
     ''' Function to check input at prompt and match'''
-    main_commands = ['category','help','edit','clear','add','delete','snippets','notes','new-category']
+    main_commands = ['snippet-categories','note-categories','help','edit','clear','add','delete','snippets','notes','new-category']
     #snippet directory check and create if absent
     #load config file
 
@@ -38,8 +38,13 @@ def main_menu(main_commands):
     text_input = session.prompt('Main-menu# ',completer = categ_comp)
     command = text_input
 
-    if command == 'category':
-        snip_category = get_categories()
+    if command == 'note-categories':
+        snip_category = get_categories(notes_path)
+        for c in snip_category:
+            print(c)
+
+    elif command == 'snippet-categories':
+        snip_category = get_categories(snippet_path)
         for c in snip_category:
             print(c)
 
@@ -162,9 +167,6 @@ def search(category,snippet, path):
             #better capture exception
         except:
             print("Snippet not found")
-
-def strip_input(str_input):
-    pass
 
 def add_snippet(category):
     snippet_name = prompt("Enter snippet name: ")
