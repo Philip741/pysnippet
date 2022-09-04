@@ -19,9 +19,14 @@ config.read_file(open('pysnip.cfg'))
 snippet_path = config.get('file_location','snippet_location')
 notes_path = config.get('file_location','note_location')
 
+#bindings = KeyBindings()
+#@bindings.add('c-t')
+#def _(event):
+#    snippet_menu()
+
 def main():
     ''' Function to check input at prompt and match'''
-    main_commands = ['snippet-categories','note-categories','help','edit','clear','add','delete','snippets','notes','new-category']
+    main_commands = ['snippet-categories','note-categories','help','edit','exit','clear','add','delete','snippets','notes','new-category']
     #snippet directory check and create if absent
     #load config file
 
@@ -35,7 +40,7 @@ def main_menu(main_commands):
     session = PromptSession()
     categ_comp = WordCompleter(main_commands)
     print("\n")
-    text_input = session.prompt('Main-menu# ',completer = categ_comp)
+    text_input = session.prompt('Main-menu# ',completer=categ_comp)
     command = text_input
 
     if command == 'note-categories':
@@ -68,10 +73,20 @@ def main_menu(main_commands):
         clear_screen()
 
     elif command == 'add':
-        categories = get_categories()
-        categ_comp = WordCompleter(categories)
-        category_prompt = session.prompt("category: ", completer = categ_comp)
-        add_snippet(category_prompt) 
+        cat_type = input("Type of category to add input \"note\" or \"snippet\": ")
+        if cat_type == "note":
+            categories = get_categories(notes_path)
+            categ_comp = WordCompleter(categories)
+            category_prompt = session.prompt("category: ", completer = categ_comp)
+            add_snippet(category_prompt, notes_path) 
+
+        elif cat_type == "snippet":
+            categories = get_categories(snippet_path)
+            categ_comp = WordCompleter(categories)
+            category_prompt = session.prompt("category: ", completer = categ_comp)
+            add_snippet(category_prompt,snippet_path ) 
+        else:
+            print("Please enter snippet or note for category type")
 
     elif command == 'edit':
         categories = get_categories()
@@ -81,8 +96,15 @@ def main_menu(main_commands):
         edit_snippet(category_prompt, snippet_name) 
 
     elif command == 'new-category':
-        category_prompt = session.prompt("new category name: ")
-        create_category(category_prompt)
+        cat_type = input("Type of category to add input \"note\" or \"snippet\": ")
+        category_prompt = session.prompt("New category name: ")
+
+        if cat_type == "note":
+            create_category(category_prompt, notes_path)
+        elif cat_type == "snippet":
+            create_category(category_prompt, snippet_path)
+        else:
+            print("Please enter note or snippet for category type")
 
     elif command == 'exit':
         session.output.flush()
@@ -168,16 +190,16 @@ def search(category,snippet, path):
         except:
             print("Snippet not found")
 
-def add_snippet(category):
+def add_snippet(category, path):
     snippet_name = prompt("Enter snippet name: ")
-    with open(snippet_path + category + ".json", 'r') as s:
+    with open(path + category + ".json", 'r') as s:
         #snippet_input function to enter snippet text
         snippet_text = snippet_input(snippet_name)
         # load file into append_snip
         append_snip = json.load(s)
         # append newly added text to category file contents
         append_snip.update(snippet_text)
-    write_json(append_snip,snippet_path + category + ".json")
+    write_json(append_snip,path + category + ".json")
 
 def del_snippet(category, snippet):
     with open(snippet_path + category + ".json", 'r') as f:
@@ -251,8 +273,8 @@ def write_json(data, filename):
     with open(filename,'w') as f:
         json.dump(data,f, indent=4)    
 
-def create_category(name):
-    file_path = snippet_path + name + ".json"
+def create_category(name, path):
+    file_path = path + name + ".json"
 
     if os.path.exists(file_path):
         print("Category currently exists")
@@ -291,9 +313,9 @@ def clear_screen():
         _ = os.system('clear') 
 
 
-#bindings = KeyBindings()
 # key bindings
 
 if __name__ == '__main__':
+
     main()
 
