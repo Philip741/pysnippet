@@ -9,10 +9,7 @@ import subprocess
 from prompt_toolkit import prompt
 from prompt_toolkit import PromptSession
 from prompt_toolkit.key_binding import KeyBindings
-from prompt_toolkit.application import run_in_terminal
-from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.completion import WordCompleter
-from itertools import chain
 
 config = configparser.ConfigParser()
 config.read_file(open('pysnip.cfg'))    
@@ -65,9 +62,22 @@ def main_menu(main_commands):
         notes_menu()
 
     elif command == 'delete':
-        category_name = input("Input category: ")
-        snippet_name = input("snippet to delete: ")
-        del_snippet(category_name, snippet_name)
+        cat_type = input("Type either \"note\" or \"snippet\" to choose type to delete: ")
+        if cat_type == "note":
+            categories = get_categories(notes_path)
+            categ_comp = WordCompleter(categories)
+            category_prompt = session.prompt("category: ", completer = categ_comp)
+            note_name = input("note to delete: ")
+            del_snippet(category_prompt, note_name, notes_path)
+
+        elif cat_type == "snippet":
+            categories = get_categories(snippet_path)
+            categ_comp = WordCompleter(categories)
+            category_prompt = session.prompt("category: ", completer = categ_comp)
+            snippet_name = input("snippet to delete: ")
+            del_snippet(category_prompt, snippet_name, snippet_path)
+        else:
+            print("Error in input please enter type to delete")
 
     elif command == 'clear':
         clear_screen()
@@ -201,18 +211,18 @@ def add_snippet(category, path):
         append_snip.update(snippet_text)
     write_json(append_snip,path + category + ".json")
 
-def del_snippet(category, snippet):
-    with open(snippet_path + category + ".json", 'r') as f:
+def del_snippet(category, name, path):
+    with open(path + category + ".json", 'r') as f:
         data = json.load(f)    
         #flatten list to dict
         #snippet_dict = {key: value for s in data for key, value in s.items()}
         for s in data.keys():
-            if s == snippet:
+            if s == name:
                 del_key = s
 
     del data[del_key]
     #open file and write data with key removed
-    with open(snippet_path + category + ".json", 'w') as f:
+    with open(path + category + ".json", 'w') as f:
         json.dump(data,f, indent=4)    
 
 def edit_snippet(category, snippet):
