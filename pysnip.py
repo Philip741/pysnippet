@@ -83,20 +83,8 @@ def main_menu(main_commands):
         clear_screen()
 
     elif command == 'add':
-        cat_type = input("Type of category to add input \"note\" or \"snippet\": ")
-        if cat_type == "note":
-            categories = get_categories(notes_path)
-            categ_comp = WordCompleter(categories)
-            category_prompt = session.prompt("category: ", completer=categ_comp)
-            add_snippet(category_prompt, notes_path) 
-
-        elif cat_type == "snippet":
-            categories = get_categories(snippet_path)
-            categ_comp = WordCompleter(categories)
-            category_prompt = session.prompt("category: ", completer=categ_comp)
-            add_snippet(category_prompt,snippet_path ) 
-        else:
-            print("Please enter snippet or note for category type")
+        #todo move this into add function
+        add_text()
 
     elif command == 'edit':
         cat_type = input("Type to edit enter \"note\" or \"snippet\": ")
@@ -202,6 +190,7 @@ def notes_menu():
         else:
             print("Note not found")
 
+
 def search(category,snippet, path):
     if category != 'avail': 
         try:
@@ -215,20 +204,36 @@ def search(category,snippet, path):
                     elif snippet == "all":
                         print(k)
                 print("\n")
-            #better capture exception
+            # better capture exception
         except:
             print("Snippet not found")
 
-def add_snippet(category, path):
-    snippet_name = prompt("Enter snippet name: ")
+
+def add_text():
+    session = PromptSession()
+    cat_type = input("Type of category to add input \"note\" or \"snippet\": ")
+    if cat_type == "note":
+        path = notes_path
+        text_type = "note"
+    elif cat_type == "snippet":
+        path = snippet_path
+        text_type = "snippet"
+        text_name = prompt("Enter snippet name: ")
+    else:
+        print("Please enter snippet or note")
+    categories = get_categories(path)
+    categ_comp = WordCompleter(categories)
+    category = session.prompt("category to add to: ", completer=categ_comp)
+    text_name = prompt(f"Enter new {text_type} name: ")
+
     with open(path + category + ".json", 'r') as s:
         #snippet_input function to enter snippet text
-        snippet_text = snippet_input(snippet_name)
+        new_text = snippet_input(text_name)
         # load file into append_snip
-        append_snip = json.load(s)
+        append_text = json.load(s)
         # append newly added text to category file contents
-        append_snip.update(snippet_text)
-    write_json(append_snip,path + category + ".json")
+        append_text.update(new_text)
+    write_json(append_text,path + category + ".json")
 
 def del_snippet(category, name, path):
     with open(path + category + ".json", 'r') as f:
