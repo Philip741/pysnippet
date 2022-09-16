@@ -152,7 +152,7 @@ def snippet_menu():
             return
         print(f"List of snippets {snips}")
         snip_complete = WordCompleter(snips)
-        print("Enter snippet name\n")
+        #print("Enter snippet name\n")
         while(True):
             snip_prompt = session.prompt(f'{cat_input[0]}# ', completer = snip_complete)
             if snip_prompt in snips:
@@ -263,14 +263,14 @@ def edit_snippet(category, name, path):
     with open(path + category + ".tmp", 'w') as f:
         for i in text_content:
             f.write(i)
-    #delete original snippet from file
-    #del_snippet(category, snippet)
+    # delete original snippet from file
+    # del_snippet(category, snippet)
     # open tmp file for editing with editor
-    subprocess.call([editor,path + category + ".tmp"])
-    #append tmp file snippet back to original file
+    subprocess.call([editor, path + category + ".tmp"])
+    # append tmp file snippet back to original file
     with open(path + category + ".tmp", 'r') as f:
-        file_lines = [l for l in f]
-        tmp_dict = {name:file_lines}
+        file_lines = [line for line in f]
+        tmp_dict = {name: file_lines}
     data.update(tmp_dict)
     write_json(data, path + category + ".json")
         # delete tmp file
@@ -297,12 +297,14 @@ def compl_snippets(category,path):
     except:
         print("Snippets not found")
     return snip_list
-    
+
+
 def write_json(data, filename):
-# pass in json data using top level key ex. snippets
-# write to filename provided
-    with open(filename,'w') as f:
-        json.dump(data,f, indent=4)    
+    # pass in json data using top level key ex. snippets
+    # write to filename provided
+    with open(filename, 'w') as f:
+        json.dump(data, f, indent=4)
+
 
 def create_category(name, path):
     file_path = path + name + ".json"
@@ -312,7 +314,8 @@ def create_category(name, path):
     else:
         with open(file_path, 'w') as s:
             snippet_init = {}
-            json.dump(snippet_init,s, indent=4)
+            json.dump(snippet_init, s, indent=4)
+
 
 def snippet_input(snip_name):
     snippet_content = []
@@ -325,7 +328,7 @@ def snippet_input(snip_name):
             line = prompt("# ")
             # line = line.rstrip()
             snippet_content.append(line + "\n")
-            #create key with snip_name and value is list of snippet content
+            # create key with snip_name and value is list of snippet content
             snippet_dict[snip_name] = snippet_content
         except EOFError:
             return snippet_dict
