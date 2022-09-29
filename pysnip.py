@@ -103,12 +103,14 @@ def main_menu(main_commands):
         elif cat_type == "snippet":
             categories = get_categories(snippet_path)
             categ_comp = WordCompleter(categories)
+            print(snippet_path)
             category_prompt = session.prompt("category: ", completer=categ_comp)
-            snips = compl_snippets(category_prompt,notes_path)
+            snips = compl_snippets(category_prompt, snippet_path)
             if len(snips) == 0:
                 return
+            snip_compl = WordCompleter(snips)
             print(f"List of notes {snips}")
-            snip_name = session.prompt('snip name# ', completer=snips)
+            snip_name = session.prompt('snip name# ', completer=snip_compl)
             edit_snippet(category_prompt, snip_name, snippet_path) 
 
     elif command == 'new-category':
@@ -218,7 +220,7 @@ def add_text():
     elif cat_type == "snippet":
         path = snippet_path
         text_type = "snippet"
-        text_name = prompt("Enter snippet name: ")
+        #text_name = prompt("Enter snippet name: ")
     else:
         print("Please enter snippet or note")
     categories = get_categories(path)
@@ -249,8 +251,9 @@ def del_snippet(category, name, path):
     with open(path + category + ".json", 'w') as f:
         json.dump(data,f, indent=4)    
 
+
 def edit_snippet(category, name, path):
-    editor = os.environ.get('EDITOR','vim')
+    editor = os.environ.get('EDITOR', 'vim')
     #open existing snippet file
     with open(path + category + ".json", 'r') as f:
         data = json.load(f)    
@@ -259,7 +262,7 @@ def edit_snippet(category, name, path):
             if k == name:
                 print(k)
                 text_content = [_ for _ in v]
-    #write snippet to tmp file
+    #write to tmp file
     with open(path + category + ".tmp", 'w') as f:
         for i in text_content:
             f.write(i)
@@ -275,6 +278,17 @@ def edit_snippet(category, name, path):
     write_json(data, path + category + ".json")
         # delete tmp file
     os.remove(path + category + ".tmp")
+
+
+def edit_cli(type, name):
+    if type == "note":
+        # find note to get category
+        #with open(notes_path + category + ".json", 'r') as f:
+         pass
+    elif type == "snippet":
+        pass
+    else:
+        print("Not a valid type set note or snippet")
 
 def get_categories(path):
 #    '''Returns a list of all category files'''
