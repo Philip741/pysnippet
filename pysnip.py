@@ -62,6 +62,7 @@ def main_menu(main_commands):
         notes_menu()
 
     elif command == 'delete':
+        # Todo: complete note name to delete
         cat_type = input("Type either \"note\" or \"snippet\" to choose type to delete: ")
         if cat_type == "note":
             categories = get_categories(notes_path)
@@ -96,7 +97,7 @@ def main_menu(main_commands):
             notes_list = WordCompleter(notes)
             if len(notes) == 0:
                 return
-            print(f"List of notes {notes}")
+            #print(f"List of notes {notes}")
             note_name = session.prompt('note name# ', completer=notes_list)
             #name = input("note to edit: ")
             edit_snippet(category_prompt, note_name, notes_path) 
@@ -109,7 +110,7 @@ def main_menu(main_commands):
             if len(snips) == 0:
                 return
             snip_compl = WordCompleter(snips)
-            print(f"List of notes {snips}")
+            #print(f"List of notes {snips}")
             snip_name = session.prompt('snip name# ', completer=snip_compl)
             edit_snippet(category_prompt, snip_name, snippet_path) 
 
@@ -152,7 +153,7 @@ def snippet_menu():
         snips = compl_snippets(cat_input[0],snippet_path)
         if len(snips) == 0:
             return
-        print(f"List of snippets {snips}")
+        #print(f"List of snippets {snips}")
         snip_complete = WordCompleter(snips)
         #print("Enter snippet name\n")
         while(True):
@@ -180,7 +181,7 @@ def notes_menu():
     snips = compl_snippets(cat_input[0],notes_path)
     if len(snips) == 0:
         return
-    print(f"List of notes {snips}")
+    #print(f"List of notes {snips}")
     snip_complete = WordCompleter(snips)
     print("\nEnter note name\n")
     while(True):
@@ -281,6 +282,7 @@ def edit_snippet(category, name, path):
 
 
 def edit_cli(type, name):
+    # Edit notes from command line flag --edit name 
     if type == "note":
         # find note to get category
         #with open(notes_path + category + ".json", 'r') as f:
@@ -359,9 +361,6 @@ def clear_screen():
     # for mac and linux(here, os.name is 'posix') 
     else: 
         _ = os.system('clear') 
-
-
-# key bindings
 
 if __name__ == '__main__':
 
