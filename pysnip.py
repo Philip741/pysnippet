@@ -94,8 +94,10 @@ def main_menu(main_commands):
             categ_comp = WordCompleter(categories)
             category_prompt = session.prompt("category: ", completer=categ_comp)
             notes = compl_snippets(category_prompt,notes_path)
+            print(len(notes))
             notes_list = WordCompleter(notes)
             if len(notes) == 0:
+                print("No notes in category!")
                 return
             #print(f"List of notes {notes}")
             note_name = session.prompt('note name# ', completer=notes_list)
@@ -108,6 +110,7 @@ def main_menu(main_commands):
             category_prompt = session.prompt("category: ", completer=categ_comp)
             snips = compl_snippets(category_prompt, snippet_path)
             if len(snips) == 0:
+                print("No snippets in this category!")
                 return
             snip_compl = WordCompleter(snips)
             #print(f"List of notes {snips}")
@@ -152,6 +155,7 @@ def snippet_menu():
         #populate list of snippets based on category
         snips = compl_snippets(cat_input[0],snippet_path)
         if len(snips) == 0:
+            print("No snippets in category!")
             return
         #print(f"List of snippets {snips}")
         snip_complete = WordCompleter(snips)
@@ -178,10 +182,11 @@ def notes_menu():
         return
 
     #populate list of notes based on category
+    #todo change name snips var
     snips = compl_snippets(cat_input[0],notes_path)
     if len(snips) == 0:
+        print("No notes in category!")
         return
-    #print(f"List of notes {snips}")
     snip_complete = WordCompleter(snips)
     print("\nEnter note name\n")
     while(True):
