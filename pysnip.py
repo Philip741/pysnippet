@@ -16,15 +16,19 @@ config.read_file(open('pysnip.cfg'))
 snippet_path = config.get('file_location','snippet_location')
 notes_path = config.get('file_location','note_location')
 
-#bindings = KeyBindings()
-#@bindings.add('c-t')
-#def _(event):
-#    snippet_menu()
-
 def main():
     ''' Function to check input at prompt and match'''
     main_commands = ['snippet-categories','note-categories','help','edit','exit','clear','add','delete','snippets','notes','new-category']
     #snippet directory check and create if absent
+    if not os.path.exists(snippet_path):
+        print("Snippet directory does not exist. Please set in pysnip.cfg")
+        return
+    if not os.path.exists(notes_path):
+        print("Notes directory does not exist. Please set in pysnip.cfg")
+        return
+
+    
+
     #load config file
 
     while(True):
