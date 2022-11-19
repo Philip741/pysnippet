@@ -3,6 +3,7 @@
 # author: Philip Browning
 
 import os
+import errno
 import json
 import configparser
 import subprocess
@@ -21,15 +22,23 @@ def main():
     main_commands = ['snippet-categories','note-categories','help','edit','exit','clear','add','delete','snippets','notes','new-category']
     #snippet directory check and create if absent
     if not os.path.exists(snippet_path):
-        print("Snippet directory does not exist. Please set in pysnip.cfg")
-        return
+        print("Snippet directory does not exist. Creating directory")
+        try:
+            os.makedirs(snippet_path)
+        except OSError as ose:
+            if ose.errno != errno.EEXIST:
+                raise
+            pass
     if not os.path.exists(notes_path):
-        print("Notes directory does not exist. Please set in pysnip.cfg")
-        return
+        print("Notes directory does not exist. Creating directory")
+        try:
+            os.makedirs(notes_path)
+        except OSError as ose:
+            if ose.errno != errno.EEXIST:
+                raise
+            pass
 
-    
-
-    #load config file
+    # load config file
 
     while(True):
         menu = main_menu(main_commands)
