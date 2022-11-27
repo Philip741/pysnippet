@@ -9,6 +9,7 @@ import configparser
 import subprocess
 from prompt_toolkit import prompt
 from prompt_toolkit import PromptSession
+from prompt_toolkit import history
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.completion import WordCompleter
 
@@ -16,6 +17,7 @@ config = configparser.ConfigParser()
 config.read_file(open('pysnip.cfg'))    
 snippet_path = config.get('file_location','snippet_location')
 notes_path = config.get('file_location','note_location')
+editor_type = config.get('editor','editor_name')
 
 def main():
     ''' Function to check input at prompt and match'''
@@ -46,11 +48,11 @@ def main():
             break
 
 def main_menu(main_commands):
-
+    prompthistory = history.InMemoryHistory()
     session = PromptSession()
     categ_comp = WordCompleter(main_commands)
     print("\n")
-    text_input = session.prompt('Main-menu# ',completer=categ_comp)
+    text_input = session.prompt('Main-menu# ',completer=categ_comp,enable_history_search=True )
     command = text_input
 
     if command == 'note-categories':
@@ -80,12 +82,12 @@ def main_menu(main_commands):
         if cat_type == "note":
             categories = get_categories(notes_path)
             categ_comp = WordCompleter(categories)
-            category_prompt = session.prompt("category: ", completer=categ_comp)
+            category_prompt = session.prompt("category: ", completer=categ_comp, enable_history_search=True)
             note_name = input("note to delete: ")
             del_snippet(category_prompt, note_name, notes_path)
 
         elif cat_type == "snippet":
-            categories = get_categories(snippet_path)
+            categories = get_categories(snippet_path, enable_history_search=True)
             categ_comp = WordCompleter(categories)
             category_prompt = session.prompt("category: ", completer=categ_comp)
             snippet_name = input("snippet to delete: ")
@@ -120,7 +122,7 @@ def main_menu(main_commands):
             categories = get_categories(snippet_path)
             categ_comp = WordCompleter(categories)
             print(snippet_path)
-            category_prompt = session.prompt("category: ", completer=categ_comp)
+            category_prompt = session.prompt("category: ", completer=categ_comp, enable_history_search=True)
             snips = compl_snippets(category_prompt, snippet_path)
             if len(snips) == 0:
                 print("No snippets in this category!")
@@ -157,7 +159,7 @@ def snippet_menu():
     #snip_list = []
     categ_comp = WordCompleter(categories)
     print("Enter snippet category\n")
-    cat_input = session.prompt('category# ',completer = categ_comp)
+    cat_input = session.prompt('category# ',completer = categ_comp, enable_history_search=True)
     if cat_input in categories:
         cat_input = cat_input.split()
     else:
@@ -187,7 +189,7 @@ def notes_menu():
     categories = get_categories(notes_path)
     categ_comp = WordCompleter(categories)
     print("Enter Note category\n")
-    cat_input = session.prompt('category# ',completer = categ_comp)
+    cat_input = session.prompt('category# ',completer = categ_comp, enable_history_search=True)
     if cat_input in categories:
         cat_input = cat_input.split()
     else:
@@ -272,7 +274,7 @@ def del_snippet(category, name, path):
 
 
 def edit_snippet(category, name, path):
-    editor = os.environ.get('EDITOR', 'vim')
+    editor = os.environ.get('EDITOR', editor_type)
     #open existing snippet file
     with open(path + category + ".json", 'r') as f:
         data = json.load(f)    
