@@ -14,15 +14,17 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.completion import WordCompleter
 
 config = configparser.ConfigParser()
-config.read_file(open('pysnip.cfg'))    
-snippet_path = config.get('file_location','snippet_location')
-notes_path = config.get('file_location','note_location')
-editor_type = config.get('editor','editor_name')
+config.read_file(open('pysnip.cfg'))
+snippet_path = config.get('file_location', 'snippet_location')
+notes_path = config.get('file_location', 'note_location')
+editor_type = config.get('editor', 'editor_name')
+
 
 def main():
     ''' Function to check input at prompt and match'''
-    main_commands = ['snippet-categories','note-categories','help','edit','exit','clear','add','delete','snippets','notes','new-category']
-    #snippet directory check and create if absent
+    main_commands = ['snippet-categories', 'note-categories', 'help', 'edit', 'exit', 'clear', 'add', 'delete',
+                     'snippets', 'notes', 'new-category']
+    # snippet directory check and create if absent
     if not os.path.exists(snippet_path):
         print("Snippet directory does not exist. Creating directory")
         try:
@@ -42,17 +44,18 @@ def main():
 
     # load config file
 
-    while(True):
+    while True:
         menu = main_menu(main_commands)
         if menu == "exit":
             break
+
 
 def main_menu(main_commands):
     prompthistory = history.InMemoryHistory()
     session = PromptSession()
     categ_comp = WordCompleter(main_commands)
     print("\n")
-    text_input = session.prompt('Main-menu# ',completer=categ_comp,enable_history_search=True )
+    text_input = session.prompt('Main-menu# ', completer=categ_comp)
     command = text_input
 
     if command == 'note-categories':
@@ -87,7 +90,7 @@ def main_menu(main_commands):
             del_snippet(category_prompt, note_name, notes_path)
 
         elif cat_type == "snippet":
-            categories = get_categories(snippet_path, enable_history_search=True)
+            categories = get_categories(snippet_path)
             categ_comp = WordCompleter(categories)
             category_prompt = session.prompt("category: ", completer=categ_comp)
             snippet_name = input("snippet to delete: ")
@@ -99,7 +102,7 @@ def main_menu(main_commands):
         clear_screen()
 
     elif command == 'add':
-        #todo move this into add function
+        # todo move this into add function
         add_text()
 
     elif command == 'edit':
@@ -108,16 +111,16 @@ def main_menu(main_commands):
             categories = get_categories(notes_path)
             categ_comp = WordCompleter(categories)
             category_prompt = session.prompt("category: ", completer=categ_comp)
-            notes = compl_snippets(category_prompt,notes_path)
+            notes = compl_snippets(category_prompt, notes_path)
             print(len(notes))
             notes_list = WordCompleter(notes)
             if len(notes) == 0:
                 print("No notes in category!")
                 return
-            #print(f"List of notes {notes}")
+            # print(f"List of notes {notes}")
             note_name = session.prompt('note name# ', completer=notes_list)
-            #name = input("note to edit: ")
-            edit_snippet(category_prompt, note_name, notes_path) 
+            # name = input("note to edit: ")
+            edit_snippet(category_prompt, note_name, notes_path)
         elif cat_type == "snippet":
             categories = get_categories(snippet_path)
             categ_comp = WordCompleter(categories)
@@ -128,12 +131,12 @@ def main_menu(main_commands):
                 print("No snippets in this category!")
                 return
             snip_compl = WordCompleter(snips)
-            #print(f"List of notes {snips}")
+            # print(f"List of notes {snips}")
             snip_name = session.prompt('snip name# ', completer=snip_compl)
-            edit_snippet(category_prompt, snip_name, snippet_path) 
+            edit_snippet(category_prompt, snip_name, snippet_path)
 
     elif command == 'new-category':
-        #todo make cat_type into a function
+        # todo make cat_type into a function
         cat_type = input("Type of category to add input \"note\" or \"snippet\": ")
         category_prompt = session.prompt("New category name: ")
 
@@ -150,77 +153,79 @@ def main_menu(main_commands):
         return menu_output
 
     else:
-       if len(text_input) == 0:
-         pass
+        if len(text_input) == 0:
+            pass
+
 
 def snippet_menu():
     session = PromptSession()
     categories = get_categories(snippet_path)
-    #snip_list = []
+    # snip_list = []
     categ_comp = WordCompleter(categories)
     print("Enter snippet category\n")
-    cat_input = session.prompt('category# ',completer = categ_comp, enable_history_search=True)
+    cat_input = session.prompt('category# ', completer=categ_comp, enable_history_search=True)
     if cat_input in categories:
         cat_input = cat_input.split()
     else:
         print('Category not found')
         return
 
-    if len(cat_input) >= 1 and len(cat_input) < 32 :
-        #populate list of snippets based on category
-        snips = compl_snippets(cat_input[0],snippet_path)
+    if len(cat_input) >= 1 and len(cat_input) < 32:
+        # populate list of snippets based on category
+        snips = compl_snippets(cat_input[0], snippet_path)
         if len(snips) == 0:
             print("No snippets in category!")
             return
-        #print(f"List of snippets {snips}")
+        # print(f"List of snippets {snips}")
         snip_complete = WordCompleter(snips)
-        #print("Enter snippet name\n")
-        while(True):
-            snip_prompt = session.prompt(f'{cat_input[0]}# ', completer = snip_complete)
+        # print("Enter snippet name\n")
+        while True:
+            snip_prompt = session.prompt(f'{cat_input[0]}# ', completer=snip_complete)
             if snip_prompt in snips:
-                search(cat_input[0], snip_prompt,snippet_path)
+                search(cat_input[0], snip_prompt, snippet_path)
             elif snip_prompt == "exit":
                 break
             else:
                 print("Snippet not found")
+
 
 def notes_menu():
     session = PromptSession()
     categories = get_categories(notes_path)
     categ_comp = WordCompleter(categories)
     print("Enter Note category\n")
-    cat_input = session.prompt('category# ',completer = categ_comp, enable_history_search=True)
+    cat_input = session.prompt('category# ', completer=categ_comp, enable_history_search=True)
     if cat_input in categories:
         cat_input = cat_input.split()
     else:
         print('Category not found')
         return
 
-    #populate list of notes based on category
-    #todo change name snips var
-    snips = compl_snippets(cat_input[0],notes_path)
+    # populate list of notes based on category
+    # todo change name snips var
+    snips = compl_snippets(cat_input[0], notes_path)
     if len(snips) == 0:
         print("No notes in category!")
         return
     snip_complete = WordCompleter(snips)
     print("\nEnter note name\n")
-    while(True):
-        snip_prompt = session.prompt(f'{cat_input[0]}# ', completer = snip_complete)
+    while (True):
+        snip_prompt = session.prompt(f'{cat_input[0]}# ', completer=snip_complete)
         if snip_prompt in snips:
-            search(cat_input[0], snip_prompt,notes_path)
+            search(cat_input[0], snip_prompt, notes_path)
         elif snip_prompt == "exit":
             break
         else:
             print("Note not found")
 
 
-def search(category,snippet, path):
-    if category != 'avail': 
+def search(category, snippet, path):
+    if category != 'avail':
         try:
             with open(path + category + ".json", 'r') as f:
-                data = json.load(f)    
+                data = json.load(f)
                 print("\n")
-                for k,v in data.items():
+                for k, v in data.items():
                     if k == snippet:
                         for value in v:
                             print(value.rstrip())
@@ -241,7 +246,7 @@ def add_text():
     elif cat_type == "snippet":
         path = snippet_path
         text_type = "snippet"
-        #text_name = prompt("Enter snippet name: ")
+        # text_name = prompt("Enter snippet name: ")
     else:
         print("Please enter snippet or note")
     categories = get_categories(path)
@@ -250,40 +255,41 @@ def add_text():
     text_name = prompt(f"Enter new {text_type} name: ")
 
     with open(path + category + ".json", 'r') as s:
-        #snippet_input function to enter snippet text
+        # snippet_input function to enter snippet text
         new_text = snippet_input(text_name)
         # load file into append_snip
         append_text = json.load(s)
         # append newly added text to category file contents
         append_text.update(new_text)
-    write_json(append_text,path + category + ".json")
+    write_json(append_text, path + category + ".json")
+
 
 def del_snippet(category, name, path):
     with open(path + category + ".json", 'r') as f:
-        data = json.load(f)    
-        #flatten list to dict
-        #snippet_dict = {key: value for s in data for key, value in s.items()}
+        data = json.load(f)
+        # flatten list to dict
+        # snippet_dict = {key: value for s in data for key, value in s.items()}
         for s in data.keys():
             if s == name:
                 del_key = s
 
     del data[del_key]
-    #open file and write data with key removed
+    # open file and write data with key removed
     with open(path + category + ".json", 'w') as f:
-        json.dump(data,f, indent=4)    
+        json.dump(data, f, indent=4)
 
 
 def edit_snippet(category, name, path):
     editor = os.environ.get('EDITOR', editor_type)
-    #open existing snippet file
+    # open existing snippet file
     with open(path + category + ".json", 'r') as f:
-        data = json.load(f)    
-    #get snippet
-        for k,v in data.items():
+        data = json.load(f)
+        # get snippet
+        for k, v in data.items():
             if k == name:
                 print(k)
                 text_content = [_ for _ in v]
-    #write to tmp file
+    # write to tmp file
     with open(path + category + ".tmp", 'w') as f:
         for i in text_content:
             f.write(i)
@@ -297,7 +303,7 @@ def edit_snippet(category, name, path):
         tmp_dict = {name: file_lines}
     data.update(tmp_dict)
     write_json(data, path + category + ".json")
-        # delete tmp file
+    # delete tmp file
     os.remove(path + category + ".tmp")
 
 
@@ -305,30 +311,32 @@ def edit_cli(type, name):
     # Edit notes from command line flag --edit name 
     if type == "note":
         # find note to get category
-        #with open(notes_path + category + ".json", 'r') as f:
-         pass
+        # with open(notes_path + category + ".json", 'r') as f:
+        pass
     elif type == "snippet":
         pass
     else:
         print("Not a valid type set note or snippet")
 
+
 def get_categories(path):
-#    '''Returns a list of all category files'''
+    #    '''Returns a list of all category files'''
     all_files = []
-    for root,dirs,files  in os.walk(path):
+    for root, dirs, files in os.walk(path):
         for f in files:
             f = f.split('.')
             all_files.append(f[0])
     all_files.sort()
-    return all_files       
+    return all_files
 
-def compl_snippets(category,path):
+
+def compl_snippets(category, path):
     '''Returns list of all snippets in categories json file'''
     snip_list = []
     try:
         with open(path + category + ".json", 'r') as f:
-            data = json.load(f)    
-            for k,v in data.items():
+            data = json.load(f)
+            for k, v in data.items():
                 snip_list.append(k)
     except:
         print("Snippets not found")
@@ -359,7 +367,7 @@ def snippet_input(snip_name):
     print("To save press enter for new line and")
     print("type ctrl d or ctrl z on windows to exit")
     print("Text Input: ")
-    while(True):
+    while True:
         try:
             line = prompt("# ")
             # line = line.rstrip()
@@ -369,20 +377,19 @@ def snippet_input(snip_name):
         except EOFError:
             return snippet_dict
             break
-    
 
-def clear_screen(): 
+
+def clear_screen():
     ''' Clears the screen based on OS '''
     name = os.name
     # for windows 
-    if name == 'nt': 
-        _ = os.system('cls') 
-  
-    # for mac and linux(here, os.name is 'posix') 
-    else: 
-        _ = os.system('clear') 
+    if name == 'nt':
+        _ = os.system('cls')
+
+        # for mac and linux(here, os.name is 'posix')
+    else:
+        _ = os.system('clear')
+
 
 if __name__ == '__main__':
-
     main()
-
