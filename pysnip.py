@@ -172,6 +172,7 @@ def snippet_menu():
 
     if len(cat_input) >= 1 and len(cat_input) < 32:
         # populate list of snippets based on category
+        snipmenu_commands = ["add", "edit", "exit"]
         snips = compl_snippets(cat_input[0], snippet_path)
         if len(snips) == 0:
             print("No snippets in category!")
@@ -181,10 +182,16 @@ def snippet_menu():
         # print("Enter snippet name\n")
         while True:
             snip_prompt = session.prompt(f'{cat_input[0]}# ', completer=snip_complete)
+
             if snip_prompt in snips:
                 search(cat_input[0], snip_prompt, snippet_path)
             elif snip_prompt == "exit":
                 break
+            # todo Add new snippet and edit while in this category
+            elif snip_prompt == "add":
+                pass
+            elif snip_prompt == "edit":
+                pass
             else:
                 print("Snippet not found")
 
