@@ -372,7 +372,7 @@ def snippet_input(snip_name):
     snippet_content = []
     snippet_dict = {}
     print("To save press enter for new line and")
-    print("type ctrl d or ctrl z on windows to exit")
+    print("type ctrl d or ctrl z on windows to save and exit")
     print("Text Input: ")
     while True:
         try:
