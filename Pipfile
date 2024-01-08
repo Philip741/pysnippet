@@ -6,8 +6,11 @@ name = "pypi"
 [packages]
 prompt-toolkit = "*"
 cx-freeze = "*"
+pygments = "*"
+rich = "*"
 
 [dev-packages]
+black = "*"
 
 [requires]
 python_version = "3.9"

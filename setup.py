@@ -1,17 +1,20 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='pysnippet',
-    version='0.0.1',
+    name='pysnip',
+    version='0.0.3',
     packages=find_packages(),
     install_requires=[
         'prompt-toolkit',
         'pygments',
         'rich'
     ],
+    package_data={
+        "pysnip": ["pysnip.cfg"],  # Include the configuration file in the package
+    },
     entry_points={
         'console_scripts': [
-            'mycommand=myproject.cli:main'
+            'pysnip=pysnip.main:main',
         ]
-    }
+    },
 )
