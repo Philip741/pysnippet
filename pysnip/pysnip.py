@@ -5,7 +5,7 @@ import json
 import configparser
 import subprocess
 from sys import platform
-
+import sys
 from prompt_toolkit import prompt
 from prompt_toolkit import PromptSession
 from prompt_toolkit import history
@@ -25,7 +25,11 @@ def clear_screen():
         _ = os.system('clear')
 def get_ostype():
     return platform.system
-
+def write_json(data, filename):
+    # pass in json data using top level key ex. snippets
+    # write to filename provided
+    with open(filename, 'w') as f:
+        json.dump(data, f, indent=4)
 class BaseManager:
     def __init__(self, config, base_path_key):
         self.config = config
@@ -115,18 +119,15 @@ class SnippetManager(BaseManager):
             elif snip_prompt == "edit":
                 edit_prompt = prompt(f'snippet name# ', completer=completer)
                 self.edit_snippet(category, edit_prompt, self.base_path )
+            elif snip_prompt == "add":
+                add_snip_name = prompt('New snippet name# ')
+                self.add_snippet(category, snippets, add_snip_name)
+            elif snip_prompt == "delete":
+                delete_snippet = prompt(f'snippet to delete#')
             else:
                 self.get_snippet(category, snippets, snip_prompt)
 
 
-
-            # todo Add new snippet and edit while in this category
-            #elif snip_prompt in self.SNIP_MENU_COMMANDS:
-             #   if snip_prompt == "edit":
-              #      self.edit_snippet(category, snip_prompt, self.base_path)
-
-            #else:
-             #   print(self.SNIPPET_NOT_FOUND)
     def edit_snippet(self, category, name, path):
         # gets editor if set in environment var otherwise defaults to editor_type in config
         editor = os.environ.get('EDITOR', self.editor_type)
@@ -180,7 +181,29 @@ class SnippetManager(BaseManager):
         else:
             print(self.SNIPPET_NOT_FOUND)
             return
+    def add_snippet(self, category, snippets, name):
+        with open(self.base_path + category + ".json", 'r') as s:
+            append_text = json.load(s)
+            snippet_content = []
+            snippet_dict = {}
+            print("To save press enter for new line and")
+            print("type ctrl d or ctrl z on windows to save and exit")
+            print("Text Input: ")
+            while True:
+                try:
+                    line = prompt("# ")
+                    # line = line.rstrip()
+                    snippet_content.append(line + "\n")
+                    # create key with snip_name and value is list of snippet content
+                    snippet_dict[name] = snippet_content
+                except EOFError:
+                    break
 
+            # append newly added text to category file contents
+            append_text.update(snippet_dict)
+        write_json(append_text, self.base_path + category + ".json")
+    def delete_snippet(self, category):
+        pass
 
 class NoteManager(BaseManager):
     def __init__(self, config):
@@ -195,16 +218,51 @@ class NoteManager(BaseManager):
 
 class App:
     def __init__(self):
+        self.home_dir = os.path.expanduser("~")
         self.config = self.load_config()
-        # load config pass to other classes
         self.snippet_manager = SnippetManager(self.config)
         self.note_manager = NoteManager(self.config)
 
-    def load_config(self):
-        config = configparser.ConfigParser()
-        config.read_file(open('pysnip.cfg'))
-        return config
+    # def load_config(self):
+    #     current_file_path = os.path.abspath(__file__)
+    #     current_directory = os.path.dirname(current_file_path)
+    #     source_path = os.path.join(current_directory, "pysnip.cfg")
+    #     destination_path = os.path.join(self.home_dir, "pysnip.cfg")
+    #     # set pysnip.cfg
+    #     shutil.copy(source_path, destination_path)
+    #     config = configparser.ConfigParser()
+    #     if os.name == 'nt':
+    #         config.read_file(open(f"{self.home_dir}\pysnip.cfg"))
+    #     else:
+    #         config.read_file(open(f"{self.home_dir}/pysnip.cfg"))
+    #     return config
 
+    def load_config(self):
+        # this is_frozen is used to resolve the path pyinstaller uses 
+        is_frozen = getattr(sys, 'frozen', False)
+        if is_frozen:
+            application_path = getattr(sys, '_MEIPASS', os.getcwd())
+        else:
+            application_path = os.path.dirname(os.path.abspath(__file__))
+
+        source_path = os.path.join(application_path, "pysnip.cfg")
+        destination_path = os.path.join(self.home_dir, "pysnip.cfg")
+
+        shutil.copy(source_path, destination_path)
+
+        config = configparser.ConfigParser()
+        config.read(destination_path)
+
+        return config
+    def create_category(self, name, path):
+        file_path = path + name + ".json"
+
+        if os.path.exists(file_path):
+            print("Category currently exists")
+        else:
+            with open(file_path, 'w') as s:
+                snippet_init = {}
+                json.dump(snippet_init, s, indent=4)
     def menu(self):
         # Function to check input at prompt and match
         main_commands = [
@@ -229,6 +287,10 @@ class App:
                     if choice == 3:  # If user selected "snippet-categories"
                         self.snippet_manager.snippet_menu()  # Call the snippet_menu method
                     # exit choice
+                    elif choice == 5:
+                        category_name = prompt("Enter category name# ")
+                        base_path = self.config["file_location"]
+                        self.create_category(category_name, base_path.get("snippet_location"))
                     elif choice == 7:
                         return
                     elif choice == 8:
