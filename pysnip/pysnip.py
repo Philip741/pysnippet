@@ -65,9 +65,8 @@ class BaseManager:
                     for k, v in data.items():
                         if k == text_name:
                             for value in v:
-                                #print(value)
-                                print(value.rstrip())
-                                #return value.rstrip()
+                                # return snippet text
+                                return value.rstrip()
                         elif text_name == "all":
                             return k
                     print("\n")
@@ -172,8 +171,7 @@ class SnippetManager(BaseManager):
 
         if name in snippets:
             snippet_content = self.retrieve_text(category, name, self.base_path)
-            #print(snippet_content)
-            #return snippet_content
+            print(snippet_content)
         else:
             print(self.SNIPPET_NOT_FOUND)
             return
