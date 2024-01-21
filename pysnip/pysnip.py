@@ -25,11 +25,7 @@ def clear_screen():
         _ = os.system('clear')
 def get_ostype():
     return platform.system
-def write_json(data, filename):
-    # pass in json data using top level key ex. snippets
-    # write to filename provided
-    with open(filename, 'w') as f:
-        json.dump(data, f, indent=4)
+
 class BaseManager:
     def __init__(self, config, base_path_key):
         self.config = config
@@ -69,8 +65,9 @@ class BaseManager:
                     for k, v in data.items():
                         if k == text_name:
                             for value in v:
-                                #print(value.rstrip())
-                                return value.rstrip()
+                                #print(value)
+                                print(value.rstrip())
+                                #return value.rstrip()
                         elif text_name == "all":
                             return k
                     print("\n")
@@ -172,12 +169,11 @@ class SnippetManager(BaseManager):
         if not snippets:
             print(self.MESSAGE_NO_SNIPPETS)
             return
-        # completer = WordCompleter(snippets)
-        # _input = prompt(f'{category}# ', completer=completer)
+
         if name in snippets:
             snippet_content = self.retrieve_text(category, name, self.base_path)
-            print(snippet_content)
-            return snippet_content
+            #print(snippet_content)
+            #return snippet_content
         else:
             print(self.SNIPPET_NOT_FOUND)
             return
@@ -201,9 +197,18 @@ class SnippetManager(BaseManager):
 
             # append newly added text to category file contents
             append_text.update(snippet_dict)
-        write_json(append_text, self.base_path + category + ".json")
-    def delete_snippet(self, category):
-        pass
+        self.write_json(append_text, self.base_path + category + ".json")
+
+    def delete_snippet(self, category, name):
+        with open(self.base_path + category + ".json", 'r') as f:
+            data = json.load(f)
+            for s in data.keys():
+                if s == name:
+                    delete_snippet = s
+        del data[delete_snippet]
+        # open file and write data with key removed
+        with open(self.base_path + category + ".json", 'w') as f:
+            json.dump(data, f, indent=4)
 
 class NoteManager(BaseManager):
     def __init__(self, config):
@@ -238,7 +243,7 @@ class App:
     #     return config
 
     def load_config(self):
-        # this is_frozen is used to resolve the path pyinstaller uses 
+        # this is_frozen is used to resolve the path pyinstaller uses
         is_frozen = getattr(sys, 'frozen', False)
         if is_frozen:
             application_path = getattr(sys, '_MEIPASS', os.getcwd())
@@ -247,13 +252,13 @@ class App:
 
         source_path = os.path.join(application_path, "pysnip.cfg")
         destination_path = os.path.join(self.home_dir, "pysnip.cfg")
-
-        shutil.copy(source_path, destination_path)
+        if not os.path.exists(destination_path):
+            shutil.copy(source_path, destination_path)
 
         config = configparser.ConfigParser()
         config.read(destination_path)
-
         return config
+
     def create_category(self, name, path):
         file_path = path + name + ".json"
 
