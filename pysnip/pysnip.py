@@ -23,26 +23,66 @@ def clear_screen():
         # for mac and linux(here, os.name is 'posix')
     else:
         _ = os.system('clear')
+
+
 def get_ostype():
     return platform.system
 
+
+def retrieve_text(category, text_name, path):
+    """Returns text from snippet or note name in json file"""
+    if category != 'avail':
+        try:
+            with open(path + category + ".json", 'r') as f:
+                data = json.load(f)
+                print("\n")
+                for k, v in data.items():
+                    if k == text_name:
+                        for value in v:
+                            # return snippet text
+                            return value.rstrip()
+                    elif text_name == "all":
+                        return k
+                print("\n")
+            # todo: better capture exception
+        except FileNotFoundError:
+            print("Snippet not found")
+
+
 class BaseManager:
-    def __init__(self, config, base_path_key):
-        self.config = config
-        #get section from configparser
-        self.base_path = config.get("file_location", base_path_key)
+    HOME_DIR = os.path.expanduser('~')
+    def __init__(self, config):
+        self.config = self.load_config()
+        # get section from configparser
+        self.snippet_path = config.get("file_location", "snippet_location")
         self.editor_type = config.get("editor", "editor_name")
-        self.home_dir = os.path.expanduser("~")  # works on both windows and linux
+        # self.home_dir = os.path.expanduser("~")  # works on both windows and linux
 
     def get_categories(self):
         all_files = []
-        for root, dirs, files in os.walk(self.base_path):
+        for root, dirs, files in os.walk(self.snippet_path):
             for f in files:
                 f = f.split('.')
                 all_files.append(f[0])
         all_files.sort()
         return all_files
 
+    def load_config(self):
+        # this is_frozen is used to resolve the path pyinstaller uses
+        is_frozen = getattr(sys, 'frozen', False)
+        if is_frozen:
+            application_path = getattr(sys, '_MEIPASS', os.getcwd())
+        else:
+            application_path = os.path.dirname(os.path.abspath(__file__))
+
+        source_path = os.path.join(application_path, "pysnip.cfg")
+        destination_path = os.path.join(self.HOME_DIR, "pysnip.cfg")
+        if not os.path.exists(destination_path):
+            shutil.copy(source_path, destination_path)
+
+        config = configparser.ConfigParser()
+        config.read(destination_path)
+        return config
     def get_name(self, category, path) -> list:
         """Returns list of all snippet or note names in json file"""
         name_list = []
@@ -55,26 +95,6 @@ class BaseManager:
             print("Snippets not found")
         return name_list
 
-    def retrieve_text(self, category, text_name, path):
-        """Returns text from snippet or note name in json file"""
-        if category != 'avail':
-            try:
-                with open(path + category + ".json", 'r') as f:
-                    data = json.load(f)
-                    print("\n")
-                    for k, v in data.items():
-                        if k == text_name:
-                            for value in v:
-                                # return snippet text
-                                return value.rstrip()
-                        elif text_name == "all":
-                            return k
-                    print("\n")
-                # todo: better capture exception
-            except FileNotFoundError:
-                print("Snippet not found")
-
-
     def search_markdown(self, category, text_name, path):
         pass
 
@@ -84,6 +104,8 @@ class BaseManager:
         # write to filename provided
         with open(filename, 'w') as f:
             json.dump(data, f, indent=4)
+    def add_dirs(self, path):
+        pass
 
 
 class SnippetManager(BaseManager):
@@ -93,8 +115,9 @@ class SnippetManager(BaseManager):
     CATEGORY_NOT_FOUND = 'Category not found'
     MESSAGE_NO_SNIPPETS = "No snippets in category!"
     MAX_CATEGORY_LENGTH = 32
+
     def __init__(self, config):
-        super().__init__(config, "snippet_location")
+        super().__init__(config)
 
     def snippet_menu(self):
         session = PromptSession()
@@ -105,8 +128,8 @@ class SnippetManager(BaseManager):
             print(self.CATEGORY_NOT_FOUND)
             return
         # get names of all snippets in category
-        snippets = self.get_name(category, self.base_path)
-        print(snippets)
+        snippets = self.get_name(category, self.snippet_path)
+
         completer = WordCompleter(snippets)
         while True:
             snip_prompt = prompt(f'{category}# ', completer=completer)
@@ -114,7 +137,7 @@ class SnippetManager(BaseManager):
                 return
             elif snip_prompt == "edit":
                 edit_prompt = prompt(f'snippet name# ', completer=completer)
-                self.edit_snippet(category, edit_prompt, self.base_path )
+                self.edit_snippet(category, edit_prompt, self.snippet_path)
             elif snip_prompt == "add":
                 add_snip_name = prompt('New snippet name# ')
                 self.add_snippet(category, snippets, add_snip_name)
@@ -170,13 +193,14 @@ class SnippetManager(BaseManager):
             return
 
         if name in snippets:
-            snippet_content = self.retrieve_text(category, name, self.base_path)
+            snippet_content = retrieve_text(category, name, self.snippet_path)
             print(snippet_content)
         else:
             print(self.SNIPPET_NOT_FOUND)
             return
+
     def add_snippet(self, category, snippets, name):
-        with open(self.base_path + category + ".json", 'r') as s:
+        with open(self.snippet_path + category + ".json", 'r') as s:
             append_text = json.load(s)
             snippet_content = []
             snippet_dict = {}
@@ -195,22 +219,23 @@ class SnippetManager(BaseManager):
 
             # append newly added text to category file contents
             append_text.update(snippet_dict)
-        self.write_json(append_text, self.base_path + category + ".json")
+        self.write_json(append_text, self.snippet_path + category + ".json")
 
     def delete_snippet(self, category, name):
-        with open(self.base_path + category + ".json", 'r') as f:
+        with open(self.snippet_path + category + ".json", 'r') as f:
             data = json.load(f)
             for s in data.keys():
                 if s == name:
                     delete_snippet = s
         del data[delete_snippet]
         # open file and write data with key removed
-        with open(self.base_path + category + ".json", 'w') as f:
+        with open(self.snippet_path + category + ".json", 'w') as f:
             json.dump(data, f, indent=4)
+
 
 class NoteManager(BaseManager):
     def __init__(self, config):
-        super().__init__(config, "note_location")
+        super().__init__(config)
 
     def notes_menu(self):
         # Logic specific for notes
@@ -225,20 +250,7 @@ class App:
         self.config = self.load_config()
         self.snippet_manager = SnippetManager(self.config)
         self.note_manager = NoteManager(self.config)
-
-    # def load_config(self):
-    #     current_file_path = os.path.abspath(__file__)
-    #     current_directory = os.path.dirname(current_file_path)
-    #     source_path = os.path.join(current_directory, "pysnip.cfg")
-    #     destination_path = os.path.join(self.home_dir, "pysnip.cfg")
-    #     # set pysnip.cfg
-    #     shutil.copy(source_path, destination_path)
-    #     config = configparser.ConfigParser()
-    #     if os.name == 'nt':
-    #         config.read_file(open(f"{self.home_dir}\pysnip.cfg"))
-    #     else:
-    #         config.read_file(open(f"{self.home_dir}/pysnip.cfg"))
-    #     return config
+        self.base = BaseManager(self.config)
 
     def load_config(self):
         # this is_frozen is used to resolve the path pyinstaller uses
@@ -266,8 +278,10 @@ class App:
             with open(file_path, 'w') as s:
                 snippet_init = {}
                 json.dump(snippet_init, s, indent=4)
+
     def menu(self):
         # Function to check input at prompt and match
+
         main_commands = [
             "snippet-categories",
             "note-categories",
@@ -279,31 +293,33 @@ class App:
             "clear",
         ]
         while True:
-            for index, option in enumerate(main_commands, 1):
-                print(f"{index}. {option}")
 
-            choice = prompt("Enter a choice: ")
+            completer = WordCompleter(main_commands)
+            choice = prompt("\npysnip # ", completer=completer)
 
-            if choice.isdigit():
-                choice = int(choice)
-                if 1 <= choice <= len(main_commands):
-                    if choice == 3:  # If user selected "snippet-categories"
-                        self.snippet_manager.snippet_menu()  # Call the snippet_menu method
-                    # exit choice
-                    elif choice == 5:
-                        category_name = prompt("Enter category name# ")
-                        base_path = self.config["file_location"]
-                        self.create_category(category_name, base_path.get("snippet_location"))
-                    elif choice == 7:
-                        return
-                    elif choice == 8:
-                        clear_screen()
-                    # Here you can add elif statements for other choices and implement their functionalities
-                    #...
-                    #return choice
+            if choice == "help" or choice == "?":
+                print("Use the tab key to populate choices\n")
+                print("The following commands are available:\n")
+                for option in main_commands:
+                    print(option)
+            elif choice == "snippets":  # If user selected "snippet-categories"
+                self.snippet_manager.snippet_menu()  # Call the snippet_menu method
+
+            elif choice == "new-category":
+                category_name = prompt("Enter category name# ")
+                base_path = self.config["file_location"]
+                self.create_category(category_name, base_path.get("snippet_location"))
+            elif choice == "snippet-categories":
+                all_categories = self.base.snippet_path
+                for c in self.base.get_categories():
+                    print(c)
+            elif choice == "exit":
+                return
+            elif choice == "clear":
+               clear_screen()
             else:
                 print("Invalid choice, please try again.")
-    # ... other utility functions ..
+
 
 if __name__ == "__main__":
     app = App()
