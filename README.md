@@ -7,15 +7,9 @@ This will eventually be a code snippet application run from the command line.
 * Auto complete based on python prompt_toolkit
 * Add , update, remove, and edit snippets or notes
 * Create category for notes or snippets
+* Can copy snippet to clipboard
 
-### Setting development dependencies
+### Installation
 
-I used pipenv for managing the python modules
-You can add all modules by running
-```bash
-pipenv install
-```
-Then you can create the virtual environment by running
-```bash
-pipenv shell
-```
+There will be binaries built via pyinstaller
+
