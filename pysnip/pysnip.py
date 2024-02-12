@@ -1,15 +1,14 @@
 import os.path
+import platform
 import shutil
-import errno
 import json
 import configparser
 import subprocess
-from sys import platform
 import sys
 from prompt_toolkit import prompt
 from prompt_toolkit import PromptSession
-from prompt_toolkit import history
-from prompt_toolkit.key_binding import KeyBindings
+#from prompt_toolkit import history
+#from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.completion import WordCompleter
 
 
@@ -26,11 +25,27 @@ def clear_screen():
 
 
 def get_ostype():
-    return platform.system
+    os_type = platform.system()
+    return os_type
+
+
+def default_homedir():
+    """Get home directory path"""
+    system = platform.system()
+    if system == 'Windows':
+        path = os.environ['USERPROFILE']
+    elif system == 'Linux':
+        path = os.path.expanduser('~')
+    elif system == 'Darwin':
+        path = os.path.expanduser('~')
+    else:
+        path = '.'
+    return path
 
 
 def retrieve_text(category, text_name, path):
     """Returns text from snippet or note name in json file"""
+    text_results = []
     if category != 'avail':
         try:
             with open(path + category + ".json", 'r') as f:
@@ -40,17 +55,28 @@ def retrieve_text(category, text_name, path):
                     if k == text_name:
                         for value in v:
                             # return snippet text
-                            return value.rstrip()
+                            text_results.append(value.rstrip())
                     elif text_name == "all":
                         return k
                 print("\n")
             # todo: better capture exception
         except FileNotFoundError:
             print("Snippet not found")
+    return text_results
 
 
+def set_snippet_dir(dirpath):
+    if not os.path.exists(dirpath):
+        os.makedirs(dirpath)
+
+def to_clipboard(text):
+    p = subprocess.Popen(['pbcopy'], stdin=subprocess.PIPE)
+    p.stdin.write(text.encode('utf-8'))
+    p.stdin.close()
+    print("Copied to clipboard")
 class BaseManager:
-    HOME_DIR = os.path.expanduser('~')
+    # todo: set home dir based on function that determines OS
+    HOME_DIR = default_homedir()
     def __init__(self, config):
         self.config = self.load_config()
         # get section from configparser
@@ -83,6 +109,7 @@ class BaseManager:
         config = configparser.ConfigParser()
         config.read(destination_path)
         return config
+
     def get_name(self, category, path) -> list:
         """Returns list of all snippet or note names in json file"""
         name_list = []
@@ -110,7 +137,7 @@ class BaseManager:
 
 class SnippetManager(BaseManager):
     CATEGORY_PROMPT = 'category# '
-    SNIP_MENU_COMMANDS = ["add", "edit", "exit"]
+    SNIP_MENU_COMMANDS = ["add", "edit", "exit", "tc"]
     SNIPPET_NOT_FOUND = 'Snippet not found'
     CATEGORY_NOT_FOUND = 'Category not found'
     MESSAGE_NO_SNIPPETS = "No snippets in category!"
@@ -143,10 +170,27 @@ class SnippetManager(BaseManager):
                 self.add_snippet(category, snippets, add_snip_name)
             elif snip_prompt == "delete":
                 delete_snippet = prompt(f'snippet to delete#')
+            elif snip_prompt == "help":
+                print("The following commands are available:")
+                for command in self.SNIP_MENU_COMMANDS:
+                    print(command)
+                self.snippet_help()
             else:
-                self.get_snippet(category, snippets, snip_prompt)
+                print_snippet = self.get_snippet(category, snippets, snip_prompt)
+                save_clip = prompt('\nSave to clipboard? y/n: ')
+                if save_clip.lower() in ['y', 'yes']:
+                    to_clipboard(print_snippet)
 
-
+    def snippet_help(self):
+        help_prompt = prompt("Enter a help command for more info: ")
+        if help_prompt == "add":
+            print("Add snippet")
+        elif help_prompt == "edit":
+            print("Edit snippet")
+        elif help_prompt == "delete":
+            print("Delete snippet")
+        elif help_prompt == "tc":
+            print("Copy to clipboard")
     def edit_snippet(self, category, name, path):
         # gets editor if set in environment var otherwise defaults to editor_type in config
         editor = os.environ.get('EDITOR', self.editor_type)
@@ -184,7 +228,6 @@ class SnippetManager(BaseManager):
         _input = session.prompt(self.CATEGORY_PROMPT, completer=categ_comp, enable_history_search=True)
         if _input in categories and 1 <= len(_input) < self.MAX_CATEGORY_LENGTH:
             return _input.split()[0]
-    # get category passes category to input of get_snippet
 
     def get_snippet(self, category, snippets, name):
         # get_name returns a list of snippet names
@@ -194,7 +237,9 @@ class SnippetManager(BaseManager):
 
         if name in snippets:
             snippet_content = retrieve_text(category, name, self.snippet_path)
-            print(snippet_content)
+            for text in snippet_content:
+                print(text)
+                return text
         else:
             print(self.SNIPPET_NOT_FOUND)
             return
@@ -233,23 +278,11 @@ class SnippetManager(BaseManager):
             json.dump(data, f, indent=4)
 
 
-class NoteManager(BaseManager):
-    def __init__(self, config):
-        super().__init__(config)
-
-    def notes_menu(self):
-        # Logic specific for notes
-        pass
-
-    # ... additional note-specific methods
-
-
 class App:
     def __init__(self):
-        self.home_dir = os.path.expanduser("~")
+        self.home_dir = default_homedir()
         self.config = self.load_config()
         self.snippet_manager = SnippetManager(self.config)
-        self.note_manager = NoteManager(self.config)
         self.base = BaseManager(self.config)
 
     def load_config(self):
@@ -284,9 +317,7 @@ class App:
 
         main_commands = [
             "snippet-categories",
-            "note-categories",
             "snippets",
-            "notes",
             "new-category",
             "help",
             "exit",
@@ -307,10 +338,11 @@ class App:
 
             elif choice == "new-category":
                 category_name = prompt("Enter category name# ")
-                base_path = self.config["file_location"]
+                # todo: test that this inherits correctly from Base class
+                base_path = self.base.config["file_location"]
                 self.create_category(category_name, base_path.get("snippet_location"))
             elif choice == "snippet-categories":
-                all_categories = self.base.snippet_path
+                # all_categories = self.base.snippet_path
                 for c in self.base.get_categories():
                     print(c)
             elif choice == "exit":
@@ -323,4 +355,5 @@ class App:
 
 if __name__ == "__main__":
     app = App()
+    set_snippet_dir(app.base.snippet_path)
     app.menu()
