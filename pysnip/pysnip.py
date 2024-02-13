@@ -180,6 +180,8 @@ class SnippetManager(BaseManager):
                 save_clip = prompt('\nSave to clipboard? y/n: ')
                 if save_clip.lower() in ['y', 'yes']:
                     to_clipboard(print_snippet)
+                else:
+                    print("Not saved to clipboard.")
 
     def snippet_help(self):
         help_prompt = prompt("Enter a help command for more info: ")
