@@ -61,7 +61,8 @@ def retrieve_text(category, text_name, path):
                 print("\n")
             # todo: better capture exception
         except FileNotFoundError:
-            print("Snippet not found")
+            #print("Snippet not found")
+            return False
     return text_results
 
 
@@ -119,7 +120,8 @@ class BaseManager:
                 for k, v in data.items():
                     name_list.append(k)
         except FileNotFoundError:
-            print("Snippets not found")
+            #print("Snippets not found")
+            return False
         return name_list
 
     def search_markdown(self, category, text_name, path):
@@ -138,7 +140,7 @@ class BaseManager:
 class SnippetManager(BaseManager):
     CATEGORY_PROMPT = 'category# '
     SNIP_MENU_COMMANDS = ["add", "edit", "exit", "tc"]
-    SNIPPET_NOT_FOUND = 'Snippet not found'
+    #SNIPPET_NOT_FOUND = 'Snippet not found'
     CATEGORY_NOT_FOUND = 'Category not found'
     MESSAGE_NO_SNIPPETS = "No snippets in category!"
     MAX_CATEGORY_LENGTH = 32
@@ -177,11 +179,14 @@ class SnippetManager(BaseManager):
                 self.snippet_help()
             else:
                 print_snippet = self.get_snippet(category, snippets, snip_prompt)
-                save_clip = prompt('\nSave to clipboard? y/n: ')
-                if save_clip.lower() in ['y', 'yes']:
-                    to_clipboard(print_snippet)
+                if print_snippet:
+                    save_clip = prompt('\nSave to clipboard? y/n: ')
+                    if save_clip.lower() in ['y', 'yes']:
+                        to_clipboard(print_snippet)
+                    else:
+                        print("Not saved to clipboard.")
                 else:
-                    print("Not saved to clipboard.")
+                    print("Snippet not found or invalid input")
 
     def snippet_help(self):
         help_prompt = prompt("Enter a help command for more info: ")
@@ -243,8 +248,8 @@ class SnippetManager(BaseManager):
                 print(text)
                 return text
         else:
-            print(self.SNIPPET_NOT_FOUND)
-            return
+            #print(self.SNIPPET_NOT_FOUND)
+            return False
 
     def add_snippet(self, category, snippets, name):
         with open(self.snippet_path + category + ".json", 'r') as s:
