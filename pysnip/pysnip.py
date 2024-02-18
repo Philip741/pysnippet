@@ -24,11 +24,6 @@ def clear_screen():
         _ = os.system('clear')
 
 
-def get_ostype():
-    os_type = platform.system()
-    return os_type
-
-
 def default_homedir():
     """Get home directory path"""
     system = platform.system()
@@ -65,6 +60,9 @@ def retrieve_text(category, text_name, path):
             return False
     return text_results
 
+# todo: Create a function to search within the text of the category not just if the first part matches
+def search_text(category, text_name, path):
+    pass
 
 def set_snippet_dir(dirpath):
     if not os.path.exists(dirpath):
@@ -180,6 +178,8 @@ class SnippetManager(BaseManager):
             else:
                 print_snippet = self.get_snippet(category, snippets, snip_prompt)
                 if print_snippet:
+                    for t in print_snippet:
+                        print(t)
                     save_clip = prompt('\nSave to clipboard? y/n: ')
                     if save_clip.lower() in ['y', 'yes']:
                         to_clipboard(print_snippet)
@@ -244,11 +244,8 @@ class SnippetManager(BaseManager):
 
         if name in snippets:
             snippet_content = retrieve_text(category, name, self.snippet_path)
-            for text in snippet_content:
-                print(text)
-                return text
+            return snippet_content
         else:
-            #print(self.SNIPPET_NOT_FOUND)
             return False
 
     def add_snippet(self, category, snippets, name):
