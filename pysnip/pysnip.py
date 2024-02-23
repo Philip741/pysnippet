@@ -183,7 +183,7 @@ class SnippetManager(BaseManager):
                         print(t)
                     save_clip = prompt('\nSave to clipboard? y/n: ')
                     if save_clip.lower() in ['y', 'yes']:
-                        to_clipboard(print_snippet)
+                        to_clipboard("".join(print_snippet))
                     else:
                         print("Not saved to clipboard.")
                 else:
