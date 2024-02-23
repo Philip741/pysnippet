@@ -197,8 +197,7 @@ class SnippetManager(BaseManager):
             print("Edit snippet")
         elif help_prompt == "delete":
             print("Delete snippet")
-        elif help_prompt == "tc":
-            print("Copy to clipboard")
+
     def edit_snippet(self, category, name, path):
         # gets editor if set in environment var otherwise defaults to editor_type in config
         editor = os.environ.get('EDITOR', self.editor_type)
