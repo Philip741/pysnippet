@@ -170,6 +170,7 @@ class SnippetManager(BaseManager):
                 self.add_snippet(category, snippets, add_snip_name)
             elif snip_prompt == "delete":
                 delete_snippet = prompt(f'snippet to delete#')
+                self.delete_snippet(category, delete_snippet)
             elif snip_prompt == "help":
                 print("The following commands are available:")
                 for command in self.SNIP_MENU_COMMANDS:
@@ -275,6 +276,7 @@ class SnippetManager(BaseManager):
             data = json.load(f)
             for s in data.keys():
                 if s == name:
+                    print(s)
                     delete_snippet = s
         del data[delete_snippet]
         # open file and write data with key removed
