@@ -120,6 +120,7 @@ class BaseManager:
         except FileNotFoundError:
             #print("Snippets not found")
             return False
+        name_list.sort()
         return name_list
 
     def search_markdown(self, category, text_name, path):
