@@ -1,2 +1,7 @@
 venv
 Pipfile.lock
+pysnip_rel.py
+pysnip_rel.spec
+snippets
+notes
+build

@@ -1,0 +1,14 @@
+{
+    "docker list all containers": [
+        "docker ps -a\n"
+    ],
+    "docker rm container": [
+        "docker rm <#container id>\n"
+    ],
+    "docker container shell": [
+        "docker exec -it <container-id|container-name> <path/to/shell>"
+    ],
+    "docker test add": [
+        "this is a test for adding to docker snippets\n"
+    ]
+}
