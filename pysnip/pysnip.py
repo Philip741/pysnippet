@@ -201,7 +201,11 @@ class SnippetManager(BaseManager):
 
     def edit_snippet(self, category, name, path):
         # gets editor if set in environment var otherwise defaults to editor_type in config
-        editor = os.environ.get('EDITOR', self.editor_type)
+        if not self.editor_type:
+            # If editor_type is not set in the config file, try to get it from the shell environment
+            editor = os.environ.get("EDITOR", "default_editor")
+        else:
+            editor = self.editor_type
         # open existing snippet file
         text_content = {}
         with open(path + category + ".json", 'r') as f:
