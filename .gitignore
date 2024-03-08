@@ -2,6 +2,7 @@ venv
 Pipfile.lock
 pysnip_rel.py
 pysnip_rel.spec
-snippets
+snippets/*
 notes
 build
+.idea
