@@ -10,8 +10,8 @@ import configparser
 import subprocess
 from prompt_toolkit import prompt
 from prompt_toolkit import PromptSession
-#from prompt_toolkit import history
-#from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit import history
+from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.completion import WordCompleter
 
 #todo get config file path 
@@ -37,12 +37,12 @@ def set_config():
     shutil.copy(source_path, destination_path)
     
 def set_dirs():
-    snip_home = f"{home_dir}/.snippets"
-    notes_home = f"{home_dir}/.notes"
+    snip_home = f"{home_dir}/pysnip/snippets"
+    notes_home = f"{home_dir}/pysnip/notes"
     print(f'snippet_path: {snippet_path}')
     print(f'snip_home: {snip_home}')
     print(f'os.path.exists(snip_home): {os.path.exists(snip_home)}')
-    if not snippet_path and os.path.exists(snip_home):
+    if not snippet_path and os.path.exists(snip_home) == False:
         try:
             print("Creating snippet in snip_home")
             os.makedirs(snip_home)
@@ -98,8 +98,7 @@ def menu():
 
 
 def main_menu(main_commands):
-    # assigned not used
-    #prompthistory = history.InMemoryHistory()
+    prompthistory = history.InMemoryHistory()
     session = PromptSession()
     categ_comp = WordCompleter(main_commands)
     print("\n")
@@ -208,6 +207,7 @@ def main_menu(main_commands):
 def snippet_menu():
     session = PromptSession()
     categories = get_categories(snippet_path)
+    # snip_list = []
     categ_comp = WordCompleter(categories)
     print("Enter snippet category\n")
     cat_input = session.prompt('category# ', completer=categ_comp, enable_history_search=True)
@@ -224,9 +224,8 @@ def snippet_menu():
         if len(snips) == 0:
             print("No snippets in category!")
             return
-        # Add menu commands to the completion list
-        all_completions = snips + snipmenu_commands
-        snip_complete = WordCompleter(all_completions)
+        # print(f"List of snippets {snips}")
+        snip_complete = WordCompleter(snips)
         # print("Enter snippet name\n")
         while True:
             snip_prompt = session.prompt(f'{cat_input[0]}# ', completer=snip_complete)
@@ -234,9 +233,7 @@ def snippet_menu():
             if snip_prompt in snips:
                 search(cat_input[0], snip_prompt, snippet_path)
             elif snip_prompt == "exit":
-                exit()
-            elif snip_prompt == "back":
-                return # return to previous menu
+                break
             # todo Add new snippet and edit while in this category
             elif snip_prompt == "add":
                 pass
