@@ -29,7 +29,7 @@ pip install -e .
 ```
 
 ### From Wheel
-I will have a release soon and you can do the following.
+This is currently recommended.
 
 Download the latest wheel file from the releases page and install:
 
