@@ -40,11 +40,12 @@ You can also choose to create a virtual environment then install in there.
 
 ## Usage
 
-Simply run the command:
+Once install run the following command:
 
 ```bash
 pysnippet
 ```
+Pressing tab will display options with autocomplete
 
 ### Commands
 
