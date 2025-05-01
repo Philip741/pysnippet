@@ -36,6 +36,7 @@ Download the latest wheel file from the releases page and install:
 ```bash
 pip install pysnippet-0.1.0-py3-none-any.whl
 ```
+You can also choose to create a virtual environment then install in there.
 
 ## Usage
 
@@ -44,7 +45,6 @@ Simply run the command:
 ```bash
 pysnippet
 ```
-You can also choose to create a virtual environment then install in there.
 
 ### Commands
 
