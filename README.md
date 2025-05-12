@@ -25,8 +25,10 @@ Then all snippets accessed are in that category.
 ```bash
 git clone https://github.com/Philip741/pysnippet.git
 cd pysnippet
-pip install -e .
+pip install .
 ```
+If you use a virtual environment make sure it is created and
+sourced outside the pysnippet source directory.
 
 ### From Wheel
 This is currently recommended.
