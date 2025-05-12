@@ -23,7 +23,7 @@ Then all snippets accessed are in that category.
 ### From Source
 
 ```bash
-git clone https://github.com/yourusername/pysnippet.git
+git clone https://github.com/Philip741/pysnippet.git
 cd pysnippet
 pip install -e .
 ```
