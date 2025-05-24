@@ -2,12 +2,19 @@ from ..managers.content_manager import ContentManager
 from .input_helpers import InputHandler
 from ..config.config import Config
 import pyperclip
+from rich.console import Console
+from rich.markdown import Markdown
+from rich.panel import Panel
+
 
 class SnippetMenu:
-    def __init__(self):
+    def __init__(self, content_manager=None, input_handler=None):
         main_config = Config()
         self.content_manager = ContentManager(main_config.snippet_path)
         self.input_handler = InputHandler()
+
+        # Initialize the rich console
+        self.console = Console()
         
         self.commands = {
                 'add': 'Add a new snippet to this category',
@@ -63,15 +70,43 @@ class SnippetMenu:
             elif choice in snippets:
                 self.display_snippet(category, choice)
 
+    def extract_code_for_clipboard(self, content_text):
+        """Extract code content from markdown code blocks"""
+        lines = content_text.split('\n')
+        code_lines = []
+        in_code_block = False
+        
+        for line in lines:
+            if line.strip().startswith('```'):
+                in_code_block = not in_code_block
+                continue
+            elif in_code_block:
+                code_lines.append(line)
+            elif '#tags' not in line.lower() and line.strip():
+                # Include non-tag lines that aren't in code blocks
+                code_lines.append(line)
+        
+        return '\n'.join(code_lines)
+
     def display_snippet(self,category, snippet_name):
         paste_text = []
+        # get snippet content returns snippet content from item name value in data dict 
         content = self.content_manager.get_item_content(category, snippet_name)
         if content:
             print(f"\n--- {snippet_name} ---\n")
+            content_text = ''.join(content)
+            
+            # Display with Rich markdown formatting
+            markdown = Markdown(content_text)
+            self.console.print(Panel(
+                markdown, 
+                title=f"📝 {snippet_name}", 
+                border_style="blue"
+            ))
             #loop through snippet content
-            for line in content:
-                print(line.rstrip())
-            print("\n")
+            #for line in content:
+             #   print(line.rstrip())
+            #print("\n")
 
             choice = self.input_handler.get_input("Copy to clipboard y/n: ")
             if choice.lower() == 'y':
@@ -80,7 +115,7 @@ class SnippetMenu:
                         pass
                     else:
                         paste_text.append(line)
-                full_text = ''.join(paste_text)
+                full_text = self.extract_code_for_clipboard(paste_text)
                 pyperclip.copy(full_text)
                 print("Copied to clipboard")
 
