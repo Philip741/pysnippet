@@ -20,7 +20,8 @@ classifiers = [
 
 dependencies = [
     "prompt-toolkit",
-    "pyperclip"
+    "pyperclip",
+    "rich>=13.0.0"
 ]
 
 [project.scripts]
