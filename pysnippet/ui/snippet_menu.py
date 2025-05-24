@@ -76,7 +76,7 @@ class SnippetMenu:
             choice = self.input_handler.get_input("Copy to clipboard y/n: ")
             if choice.lower() == 'y':
                 for line in content:
-                    if '###' in line:
+                    if '#tags' in line:
                         pass
                     else:
                         paste_text.append(line)
