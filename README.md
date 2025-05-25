@@ -1,7 +1,7 @@
 
 # pysnippet
 
-A lightweight CLI-based code snippet manager that helps you organize, retrieve, and reuse your code snippets. There
+A lightweight CLI-based code snippet manager that helps you organize, retrieve, and reuse your code snippets or whatever other text. There
 are many like this but I wanted one that would have just a menu and allow you to be in a specific context. If you
 choose snippets from the main menu then it can put you in a specific category and the prompt reflects it eg. docker#
 Then all snippets accessed are in that category.
@@ -9,6 +9,7 @@ Then all snippets accessed are in that category.
 ## Features
 
 - Interactive menu-based interface with intuitive navigation
+- Output from markdown using python rich library
 - Smart autocompletion powered by Python's prompt_toolkit
 - Comprehensive snippet management:
   - Create, view, update, and delete snippets
@@ -58,6 +59,9 @@ Pressing tab will display options with autocomplete
 - `snippet-categories` - List all available categories
 - `exit` - Exit the program
 
+It is recommended to put any code snippets into markdown code blocks because
+the program will detect those only to copy to the clipboard.
+
 ## Configuration
 
 pysnippet stores its configuration in `~/.pysnippet/pysnip.cfg` and snippets in `~/.snippets/`.
@@ -67,8 +71,11 @@ pysnippet stores its configuration in `~/.pysnippet/pysnip.cfg` and snippets in 
 - Python 3.6+
 - prompt_toolkit
 - pyperclip (optional, for clipboard support)
+- rich
 
 May need something like xclip if your Linux distro has no clipboard functionality pyperclip can find.
+
+If building from source all requirements are in the pyproject.toml file.
 
 ## License
 
