@@ -72,20 +72,14 @@ class SnippetMenu:
 
     def extract_code_for_clipboard(self, content_text):
         """Extract code content from markdown code blocks"""
-        lines = content_text.split('\n')
         code_lines = []
         in_code_block = False
         
-        for line in lines:
+        for line in content_text:
             if line.strip().startswith('```'):
                 in_code_block = not in_code_block
-                continue
             elif in_code_block:
                 code_lines.append(line)
-            elif '#tags' not in line.lower() and line.strip():
-                # Include non-tag lines that aren't in code blocks
-                code_lines.append(line)
-        
         return '\n'.join(code_lines)
 
     def display_snippet(self,category, snippet_name):
@@ -93,7 +87,6 @@ class SnippetMenu:
         # get snippet content returns snippet content from item name value in data dict 
         content = self.content_manager.get_item_content(category, snippet_name)
         if content:
-            print(f"\n--- {snippet_name} ---\n")
             content_text = ''.join(content)
             
             # Display with Rich markdown formatting
@@ -103,12 +96,8 @@ class SnippetMenu:
                 title=f"📝 {snippet_name}", 
                 border_style="blue"
             ))
-            #loop through snippet content
-            #for line in content:
-             #   print(line.rstrip())
-            #print("\n")
 
-            choice = self.input_handler.get_input("Copy to clipboard y/n: ")
+            choice = self.input_handler.get_input("Copy code blocks to clipboard y/n: ")
             if choice.lower() == 'y':
                 for line in content:
                     if '#tags' in line:
